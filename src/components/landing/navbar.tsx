@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useTheme } from "@/components/ui/theme-provider";
 import "./landing.css";
+import { LINKS } from "@/data/landing/nav";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -20,16 +21,14 @@ export function Navbar() {
     <header className={`nav ${scrolled ? "nav--scrolled" : ""}`}>
       <div className="nav__inner">
         <Link href="/" className="nav__logo">
-          <div className="nav__logo-icon"><span>K</span></div>
+          <div className="nav__logo-icon">
+            <span>K</span>
+          </div>
           <span className="nav__logo-name">Kweri</span>
         </Link>
 
         <nav className="nav__links">
-          {[
-            { label: "Features", href: "#features" },
-            { label: "How it works", href: "#how-it-works" },
-            { label: "Schemas", href: "#schemas" },
-          ].map((item) => (
+          {LINKS.map((item) => (
             <a key={item.href} href={item.href} className="nav__link">
               {item.label}
             </a>
@@ -37,10 +36,13 @@ export function Navbar() {
         </nav>
 
         <div className="nav__actions">
-          <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
-            {theme === "dark"
-              ? <Sun size={15} />
-              : <Moon size={15} />}
+          <button
+            type="button"
+            className="theme-toggle"
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+          >
+            {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
           </button>
           <Link href="/builder" className="btn btn--primary btn--sm">
             Try it free

@@ -2,19 +2,7 @@
 
 import { useEffect, useState } from "react";
 import "./landing.css";
-
-type Step =
-  | { kind: "group"; logic: "AND" | "OR"; depth: number }
-  | { kind: "rule"; field: string; op: string; value: string; depth: number };
-
-const STEPS: Step[] = [
-  { kind: "group", logic: "AND", depth: 0 },
-  { kind: "rule", field: "country", op: "=", value: "Nigeria", depth: 1 },
-  { kind: "rule", field: "age", op: ">", value: "18", depth: 1 },
-  { kind: "group", logic: "OR", depth: 1 },
-  { kind: "rule", field: "status", op: "=", value: "active", depth: 2 },
-  { kind: "rule", field: "purchases", op: ">", value: "10", depth: 2 },
-];
+import { SQL_LINES, STEPS } from "@/data/landing/hero";
 
 const FIELD_COLORS: Record<string, string> = {
   country: "var(--color-teal-bright)",
@@ -22,17 +10,6 @@ const FIELD_COLORS: Record<string, string> = {
   status: "var(--color-success)",
   purchases: "var(--color-warning)",
 };
-
-const SQL_LINES = [
-  { text: "SELECT * FROM users", color: "var(--color-orange)" },
-  { text: "WHERE", color: "var(--color-muted)" },
-  { text: '  country = "Nigeria"', color: "var(--color-primary)" },
-  { text: "  AND age > 18", color: "var(--color-primary)" },
-  { text: "  AND (", color: "var(--color-muted)" },
-  { text: '    status = "active"', color: "var(--color-primary)" },
-  { text: "    OR purchases > 10", color: "var(--color-primary)" },
-  { text: "  )", color: "var(--color-muted)" },
-];
 
 const TOTAL_DURATION = STEPS.length * 600 + SQL_LINES.length * 180 + 3000;
 
