@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-
 export function FirstVisitGate({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [allowed, setAllowed] = useState(false);

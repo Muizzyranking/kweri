@@ -61,10 +61,15 @@ describe("createRootGroup", () => {
 describe("updateNode", () => {
   it("updates the root node itself", () => {
     const root = createGroup("AND");
-    const updated = updateNode(root, root.id, (n) => ({
-      ...n,
-      logic: "OR",
-    } as QueryGroup));
+    const updated = updateNode(
+      root,
+      root.id,
+      (n) =>
+        ({
+          ...n,
+          logic: "OR",
+        }) as QueryGroup,
+    );
     expect((updated as QueryGroup).logic).toBe("OR");
   });
 
@@ -88,7 +93,8 @@ describe("updateNode", () => {
       value: "25",
     }));
 
-    const updatedRule = (updated.children[0] as QueryGroup).children[0] as QueryRule;
+    const updatedRule = (updated.children[0] as QueryGroup)
+      .children[0] as QueryRule;
     expect(updatedRule.value).toBe("25");
   });
 
@@ -148,7 +154,10 @@ describe("moveNode", () => {
     const rule = createRule("name");
     const groupA: QueryGroup = { ...createGroup("AND"), children: [rule] };
     const groupB: QueryGroup = { ...createGroup("OR"), children: [] };
-    const root: QueryGroup = { ...createGroup("AND"), children: [groupA, groupB] };
+    const root: QueryGroup = {
+      ...createGroup("AND"),
+      children: [groupA, groupB],
+    };
 
     const updated = moveNode(root, rule.id, groupB.id, 0);
     const updatedA = updated.children[0] as QueryGroup;

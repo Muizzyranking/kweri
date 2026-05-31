@@ -1,8 +1,17 @@
 import { v4 as uuidv4 } from "uuid";
-import type { LogicOperator, Operator, QueryGroup, QueryNode, QueryRule } from "./types";
+import type {
+  LogicOperator,
+  Operator,
+  QueryGroup,
+  QueryNode,
+  QueryRule,
+} from "./types";
 
 // FACTORIES
-export function createRule(field: string, operator: Operator = "equals"): QueryRule {
+export function createRule(
+  field: string,
+  operator: Operator = "equals",
+): QueryRule {
   return { id: uuidv4(), kind: "rule", field, operator, value: "" };
 }
 
@@ -28,7 +37,7 @@ export function cloneNode<T extends QueryNode>(node: T): T {
 export function updateNode(
   root: QueryGroup,
   id: string,
-  updater: (node: QueryNode) => QueryNode
+  updater: (node: QueryNode) => QueryNode,
 ): QueryGroup {
   if (root.id === id) {
     return updater(root) as QueryGroup;
@@ -48,16 +57,14 @@ export function removeNode(root: QueryGroup, id: string): QueryGroup {
     ...root,
     children: root.children
       .filter((child) => child.id !== id)
-      .map((child) =>
-        child.kind === "group" ? removeNode(child, id) : child
-      ),
+      .map((child) => (child.kind === "group" ? removeNode(child, id) : child)),
   };
 }
 
 export function addChildToGroup(
   root: QueryGroup,
   groupId: string,
-  child: QueryNode
+  child: QueryNode,
 ): QueryGroup {
   return updateNode(root, groupId, (node) => {
     if (node.kind !== "group") return node;
@@ -70,14 +77,17 @@ export function moveNode(
   root: QueryGroup,
   nodeId: string,
   targetGroupId: string,
-  targetIndex: number
+  targetIndex: number,
 ): QueryGroup {
   let moved: QueryNode | null = null;
   const findAndRemove = (group: QueryGroup): QueryGroup => ({
     ...group,
     children: group.children
       .filter((c) => {
-        if (c.id === nodeId) { moved = c; return false; }
+        if (c.id === nodeId) {
+          moved = c;
+          return false;
+        }
         return true;
       })
       .map((c) => (c.kind === "group" ? findAndRemove(c) : c)),
@@ -97,9 +107,7 @@ export function moveNode(
     }
     return {
       ...group,
-      children: group.children.map((c) =>
-        c.kind === "group" ? insert(c) : c
-      ),
+      children: group.children.map((c) => (c.kind === "group" ? insert(c) : c)),
     };
   };
 
@@ -145,7 +153,7 @@ export function countRules(root: QueryGroup): number {
 export function getDepth(node: QueryGroup): number {
   if (node.children.length === 0) return 1;
   const childDepths = node.children.map((c) =>
-    c.kind === "group" ? getDepth(c) : 0
+    c.kind === "group" ? getDepth(c) : 0,
   );
   return 1 + Math.max(...childDepths);
 }

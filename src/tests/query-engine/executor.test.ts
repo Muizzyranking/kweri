@@ -12,103 +12,262 @@ const makeRoot = (...children: (QueryGroup | QueryRule)[]): QueryGroup => ({
 
 describe("executeQuery — basic filtering", () => {
   it("returns all rows for empty group", () => {
-    const result = executeQuery(USERS_DATA as Record<string, unknown>[], createGroup("AND"), USERS_SCHEMA);
+    const result = executeQuery(
+      USERS_DATA as Record<string, unknown>[],
+      createGroup("AND"),
+      USERS_SCHEMA,
+    );
     expect(result.matched).toBe(USERS_DATA.length);
   });
 
   it("filters by equals on string field", () => {
-    const rule: QueryRule = { ...createRule("country"), operator: "equals", value: "Nigeria" };
-    const result = executeQuery(USERS_DATA as Record<string, unknown>[], makeRoot(rule), USERS_SCHEMA);
+    const rule: QueryRule = {
+      ...createRule("country"),
+      operator: "equals",
+      value: "Nigeria",
+    };
+    const result = executeQuery(
+      USERS_DATA as Record<string, unknown>[],
+      makeRoot(rule),
+      USERS_SCHEMA,
+    );
     expect(result.rows.every((r) => r.country === "Nigeria")).toBe(true);
   });
 
   it("filters by greater_than on number", () => {
-    const rule: QueryRule = { ...createRule("age"), operator: "greater_than", value: "40" };
-    const result = executeQuery(USERS_DATA as Record<string, unknown>[], makeRoot(rule), USERS_SCHEMA);
+    const rule: QueryRule = {
+      ...createRule("age"),
+      operator: "greater_than",
+      value: "40",
+    };
+    const result = executeQuery(
+      USERS_DATA as Record<string, unknown>[],
+      makeRoot(rule),
+      USERS_SCHEMA,
+    );
     expect(result.rows.every((r) => Number(r.age) > 40)).toBe(true);
   });
 
   it("filters by less_than on number", () => {
-    const rule: QueryRule = { ...createRule("age"), operator: "less_than", value: "25" };
-    const result = executeQuery(USERS_DATA as Record<string, unknown>[], makeRoot(rule), USERS_SCHEMA);
+    const rule: QueryRule = {
+      ...createRule("age"),
+      operator: "less_than",
+      value: "25",
+    };
+    const result = executeQuery(
+      USERS_DATA as Record<string, unknown>[],
+      makeRoot(rule),
+      USERS_SCHEMA,
+    );
     expect(result.rows.every((r) => Number(r.age) < 25)).toBe(true);
   });
 
   it("filters by contains on string", () => {
-    const rule: QueryRule = { ...createRule("name"), operator: "contains", value: "ada" };
-    const result = executeQuery(USERS_DATA as Record<string, unknown>[], makeRoot(rule), USERS_SCHEMA);
-    expect(result.rows.every((r) => String(r.name).toLowerCase().includes("ada"))).toBe(true);
+    const rule: QueryRule = {
+      ...createRule("name"),
+      operator: "contains",
+      value: "ada",
+    };
+    const result = executeQuery(
+      USERS_DATA as Record<string, unknown>[],
+      makeRoot(rule),
+      USERS_SCHEMA,
+    );
+    expect(
+      result.rows.every((r) => String(r.name).toLowerCase().includes("ada")),
+    ).toBe(true);
   });
 
   it("filters by starts_with", () => {
-    const rule: QueryRule = { ...createRule("name"), operator: "starts_with", value: "A" };
-    const result = executeQuery(USERS_DATA as Record<string, unknown>[], makeRoot(rule), USERS_SCHEMA);
-    expect(result.rows.every((r) => String(r.name).toLowerCase().startsWith("a"))).toBe(true);
+    const rule: QueryRule = {
+      ...createRule("name"),
+      operator: "starts_with",
+      value: "A",
+    };
+    const result = executeQuery(
+      USERS_DATA as Record<string, unknown>[],
+      makeRoot(rule),
+      USERS_SCHEMA,
+    );
+    expect(
+      result.rows.every((r) => String(r.name).toLowerCase().startsWith("a")),
+    ).toBe(true);
   });
 
   it("filters by ends_with", () => {
-    const rule: QueryRule = { ...createRule("email"), operator: "ends_with", value: ".com" };
-    const result = executeQuery(USERS_DATA as Record<string, unknown>[], makeRoot(rule), USERS_SCHEMA);
-    expect(result.rows.every((r) => String(r.email).endsWith(".com"))).toBe(true);
+    const rule: QueryRule = {
+      ...createRule("email"),
+      operator: "ends_with",
+      value: ".com",
+    };
+    const result = executeQuery(
+      USERS_DATA as Record<string, unknown>[],
+      makeRoot(rule),
+      USERS_SCHEMA,
+    );
+    expect(result.rows.every((r) => String(r.email).endsWith(".com"))).toBe(
+      true,
+    );
   });
 
   it("filters by not_equals", () => {
-    const rule: QueryRule = { ...createRule("status"), operator: "not_equals", value: "active" };
-    const result = executeQuery(USERS_DATA as Record<string, unknown>[], makeRoot(rule), USERS_SCHEMA);
+    const rule: QueryRule = {
+      ...createRule("status"),
+      operator: "not_equals",
+      value: "active",
+    };
+    const result = executeQuery(
+      USERS_DATA as Record<string, unknown>[],
+      makeRoot(rule),
+      USERS_SCHEMA,
+    );
     expect(result.rows.every((r) => r.status !== "active")).toBe(true);
   });
 
   it("filters by in_array", () => {
-    const rule: QueryRule = { ...createRule("country"), operator: "in_array", value: "Nigeria,Ghana" };
-    const result = executeQuery(USERS_DATA as Record<string, unknown>[], makeRoot(rule), USERS_SCHEMA);
-    expect(result.rows.every((r) => ["Nigeria", "Ghana"].includes(String(r.country)))).toBe(true);
+    const rule: QueryRule = {
+      ...createRule("country"),
+      operator: "in_array",
+      value: "Nigeria,Ghana",
+    };
+    const result = executeQuery(
+      USERS_DATA as Record<string, unknown>[],
+      makeRoot(rule),
+      USERS_SCHEMA,
+    );
+    expect(
+      result.rows.every((r) =>
+        ["Nigeria", "Ghana"].includes(String(r.country)),
+      ),
+    ).toBe(true);
     expect(result.matched).toBeGreaterThan(0);
   });
 
   it("filters by not_in_array", () => {
-    const rule: QueryRule = { ...createRule("status"), operator: "not_in_array", value: "banned,inactive" };
-    const result = executeQuery(USERS_DATA as Record<string, unknown>[], makeRoot(rule), USERS_SCHEMA);
-    expect(result.rows.every((r) => !["banned", "inactive"].includes(String(r.status)))).toBe(true);
+    const rule: QueryRule = {
+      ...createRule("status"),
+      operator: "not_in_array",
+      value: "banned,inactive",
+    };
+    const result = executeQuery(
+      USERS_DATA as Record<string, unknown>[],
+      makeRoot(rule),
+      USERS_SCHEMA,
+    );
+    expect(
+      result.rows.every(
+        (r) => !["banned", "inactive"].includes(String(r.status)),
+      ),
+    ).toBe(true);
   });
 
   it("filters by between on number", () => {
-    const rule: QueryRule = { ...createRule("age"), operator: "between", value: "20", valueTo: "30" };
-    const result = executeQuery(USERS_DATA as Record<string, unknown>[], makeRoot(rule), USERS_SCHEMA);
-    expect(result.rows.every((r) => Number(r.age) >= 20 && Number(r.age) <= 30)).toBe(true);
+    const rule: QueryRule = {
+      ...createRule("age"),
+      operator: "between",
+      value: "20",
+      valueTo: "30",
+    };
+    const result = executeQuery(
+      USERS_DATA as Record<string, unknown>[],
+      makeRoot(rule),
+      USERS_SCHEMA,
+    );
+    expect(
+      result.rows.every((r) => Number(r.age) >= 20 && Number(r.age) <= 30),
+    ).toBe(true);
   });
 
   it("filters by regex", () => {
-    const rule: QueryRule = { ...createRule("email"), operator: "regex", value: "@example" };
-    const result = executeQuery(USERS_DATA as Record<string, unknown>[], makeRoot(rule), USERS_SCHEMA);
-    expect(result.rows.every((r) => /@example/i.test(String(r.email)))).toBe(true);
+    const rule: QueryRule = {
+      ...createRule("email"),
+      operator: "regex",
+      value: "@example",
+    };
+    const result = executeQuery(
+      USERS_DATA as Record<string, unknown>[],
+      makeRoot(rule),
+      USERS_SCHEMA,
+    );
+    expect(result.rows.every((r) => /@example/i.test(String(r.email)))).toBe(
+      true,
+    );
   });
 });
 
 describe("executeQuery — AND / OR logic", () => {
   it("applies AND logic — all conditions must match", () => {
-    const r1: QueryRule = { ...createRule("country"), operator: "equals", value: "Nigeria" };
-    const r2: QueryRule = { ...createRule("status"), operator: "equals", value: "active" };
+    const r1: QueryRule = {
+      ...createRule("country"),
+      operator: "equals",
+      value: "Nigeria",
+    };
+    const r2: QueryRule = {
+      ...createRule("status"),
+      operator: "equals",
+      value: "active",
+    };
     const root = makeRoot(r1, r2);
-    const result = executeQuery(USERS_DATA as Record<string, unknown>[], root, USERS_SCHEMA);
-    expect(result.rows.every((r) => r.country === "Nigeria" && r.status === "active")).toBe(true);
+    const result = executeQuery(
+      USERS_DATA as Record<string, unknown>[],
+      root,
+      USERS_SCHEMA,
+    );
+    expect(
+      result.rows.every(
+        (r) => r.country === "Nigeria" && r.status === "active",
+      ),
+    ).toBe(true);
   });
 
   it("applies OR logic — at least one condition must match", () => {
-    const r1: QueryRule = { ...createRule("country"), operator: "equals", value: "Nigeria" };
-    const r2: QueryRule = { ...createRule("country"), operator: "equals", value: "Ghana" };
+    const r1: QueryRule = {
+      ...createRule("country"),
+      operator: "equals",
+      value: "Nigeria",
+    };
+    const r2: QueryRule = {
+      ...createRule("country"),
+      operator: "equals",
+      value: "Ghana",
+    };
     const root: QueryGroup = { ...createGroup("OR"), children: [r1, r2] };
-    const result = executeQuery(USERS_DATA as Record<string, unknown>[], root, USERS_SCHEMA);
-    expect(result.rows.every((r) => r.country === "Nigeria" || r.country === "Ghana")).toBe(true);
+    const result = executeQuery(
+      USERS_DATA as Record<string, unknown>[],
+      root,
+      USERS_SCHEMA,
+    );
+    expect(
+      result.rows.every(
+        (r) => r.country === "Nigeria" || r.country === "Ghana",
+      ),
+    ).toBe(true);
     expect(result.matched).toBeGreaterThan(0);
   });
 
   it("handles nested AND inside OR", () => {
-    const r1: QueryRule = { ...createRule("country"), operator: "equals", value: "Nigeria" };
-    const r2: QueryRule = { ...createRule("age"), operator: "greater_than", value: "30" };
-    const r3: QueryRule = { ...createRule("status"), operator: "equals", value: "active" };
+    const r1: QueryRule = {
+      ...createRule("country"),
+      operator: "equals",
+      value: "Nigeria",
+    };
+    const r2: QueryRule = {
+      ...createRule("age"),
+      operator: "greater_than",
+      value: "30",
+    };
+    const r3: QueryRule = {
+      ...createRule("status"),
+      operator: "equals",
+      value: "active",
+    };
     const andGroup: QueryGroup = { ...createGroup("AND"), children: [r2, r3] };
     const root: QueryGroup = { ...createGroup("OR"), children: [r1, andGroup] };
-    const result = executeQuery(USERS_DATA as Record<string, unknown>[], root, USERS_SCHEMA);
+    const result = executeQuery(
+      USERS_DATA as Record<string, unknown>[],
+      root,
+      USERS_SCHEMA,
+    );
     expect(result.matched).toBeGreaterThanOrEqual(0);
     result.rows.forEach((r) => {
       const passesR1 = r.country === "Nigeria";
@@ -120,13 +279,25 @@ describe("executeQuery — AND / OR logic", () => {
 
 describe("executeQuery — result metadata", () => {
   it("reports correct total count", () => {
-    const rule: QueryRule = { ...createRule("country"), operator: "equals", value: "Nigeria" };
-    const result = executeQuery(USERS_DATA as Record<string, unknown>[], makeRoot(rule), USERS_SCHEMA);
+    const rule: QueryRule = {
+      ...createRule("country"),
+      operator: "equals",
+      value: "Nigeria",
+    };
+    const result = executeQuery(
+      USERS_DATA as Record<string, unknown>[],
+      makeRoot(rule),
+      USERS_SCHEMA,
+    );
     expect(result.total).toBe(USERS_DATA.length);
   });
 
   it("reports executionTimeMs as a non-negative number", () => {
-    const result = executeQuery(USERS_DATA as Record<string, unknown>[], createGroup("AND"), USERS_SCHEMA);
+    const result = executeQuery(
+      USERS_DATA as Record<string, unknown>[],
+      createGroup("AND"),
+      USERS_SCHEMA,
+    );
     expect(result.executionTimeMs).toBeGreaterThanOrEqual(0);
   });
 });
@@ -137,7 +308,7 @@ describe("executeQuery — pagination", () => {
       USERS_DATA as Record<string, unknown>[],
       createGroup("AND"),
       USERS_SCHEMA,
-      { page: 1, pageSize: 10 }
+      { page: 1, pageSize: 10 },
     );
     expect(result.rows).toHaveLength(10);
   });
@@ -147,13 +318,13 @@ describe("executeQuery — pagination", () => {
       USERS_DATA as Record<string, unknown>[],
       createGroup("AND"),
       USERS_SCHEMA,
-      { page: 1, pageSize: 5 }
+      { page: 1, pageSize: 5 },
     );
     const page2 = executeQuery(
       USERS_DATA as Record<string, unknown>[],
       createGroup("AND"),
       USERS_SCHEMA,
-      { page: 2, pageSize: 5 }
+      { page: 2, pageSize: 5 },
     );
     expect(page1.rows[0].id).not.toBe(page2.rows[0].id);
   });
@@ -163,7 +334,7 @@ describe("executeQuery — pagination", () => {
       USERS_DATA as Record<string, unknown>[],
       createGroup("AND"),
       USERS_SCHEMA,
-      { page: 999, pageSize: 20 }
+      { page: 999, pageSize: 20 },
     );
     expect(result.rows).toHaveLength(0);
   });
@@ -175,10 +346,12 @@ describe("executeQuery — sorting", () => {
       USERS_DATA as Record<string, unknown>[],
       createGroup("AND"),
       USERS_SCHEMA,
-      { sortField: "age", sortDirection: "asc" }
+      { sortField: "age", sortDirection: "asc" },
     );
     for (let i = 1; i < result.rows.length; i++) {
-      expect(Number(result.rows[i].age)).toBeGreaterThanOrEqual(Number(result.rows[i - 1].age));
+      expect(Number(result.rows[i].age)).toBeGreaterThanOrEqual(
+        Number(result.rows[i - 1].age),
+      );
     }
   });
 
@@ -187,17 +360,23 @@ describe("executeQuery — sorting", () => {
       USERS_DATA as Record<string, unknown>[],
       createGroup("AND"),
       USERS_SCHEMA,
-      { sortField: "age", sortDirection: "desc" }
+      { sortField: "age", sortDirection: "desc" },
     );
     for (let i = 1; i < result.rows.length; i++) {
-      expect(Number(result.rows[i].age)).toBeLessThanOrEqual(Number(result.rows[i - 1].age));
+      expect(Number(result.rows[i].age)).toBeLessThanOrEqual(
+        Number(result.rows[i - 1].age),
+      );
     }
   });
 });
 
 describe("executeQuery — edge cases", () => {
   it("handles empty dataset gracefully", () => {
-    const rule: QueryRule = { ...createRule("country"), operator: "equals", value: "Nigeria" };
+    const rule: QueryRule = {
+      ...createRule("country"),
+      operator: "equals",
+      value: "Nigeria",
+    };
     const result = executeQuery([], makeRoot(rule), USERS_SCHEMA);
     expect(result.matched).toBe(0);
     expect(result.rows).toHaveLength(0);
@@ -205,15 +384,31 @@ describe("executeQuery — edge cases", () => {
   });
 
   it("returns zero matches for impossible query", () => {
-    const rule: QueryRule = { ...createRule("age"), operator: "equals", value: "9999" };
-    const result = executeQuery(USERS_DATA as Record<string, unknown>[], makeRoot(rule), USERS_SCHEMA);
+    const rule: QueryRule = {
+      ...createRule("age"),
+      operator: "equals",
+      value: "9999",
+    };
+    const result = executeQuery(
+      USERS_DATA as Record<string, unknown>[],
+      makeRoot(rule),
+      USERS_SCHEMA,
+    );
     expect(result.matched).toBe(0);
   });
 
   it("handles invalid regex gracefully without throwing", () => {
-    const rule: QueryRule = { ...createRule("name"), operator: "regex", value: "[invalid" };
+    const rule: QueryRule = {
+      ...createRule("name"),
+      operator: "regex",
+      value: "[invalid",
+    };
     expect(() =>
-      executeQuery(USERS_DATA as Record<string, unknown>[], makeRoot(rule), USERS_SCHEMA)
+      executeQuery(
+        USERS_DATA as Record<string, unknown>[],
+        makeRoot(rule),
+        USERS_SCHEMA,
+      ),
     ).not.toThrow();
   });
 });
