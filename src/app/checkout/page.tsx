@@ -102,7 +102,7 @@ export default function CheckoutPage() {
             Yo yo, I&apos;m kidding!!
           </div>
           <div className={`joke__body ${jokeStep < 3 ? "fade-hidden" : ""}`}>
-            Kweri is completely free. We just wanted to see your face. 🤭
+            Kweri is completely free. I just wanted to see your face. 🤭
           </div>
           <div
             className={`joke__redirect ${jokeStep < 4 ? "fade-hidden" : ""}`}
