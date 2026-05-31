@@ -10,16 +10,28 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = "secondary", size = "md", loading, disabled, children, ...props }, ref) => {
+  (
+    {
+      className,
+      variant = "secondary",
+      size = "md",
+      loading,
+      disabled,
+      children,
+      ...props
+    },
+    ref,
+  ) => {
     const base =
       "inline-flex items-center justify-center gap-2 font-medium rounded-md transition-all duration-200 cursor-pointer select-none disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-2 active:scale-[0.97]";
 
     const variants = {
-      primary:   "bg-orange text-white hover:bg-orange-dim shadow-orange",
-      secondary: "bg-elevated text-primary border border-border hover:border-border-bright hover:bg-hover",
-      ghost:     "text-secondary hover:text-primary hover:bg-elevated",
-      danger:    "text-error border border-error hover:bg-error hover:text-white",
-      teal:      "bg-teal text-white hover:bg-teal-bright shadow-teal",
+      primary: "bg-orange text-white hover:bg-orange-dim shadow-orange",
+      secondary:
+        "bg-elevated text-primary border border-border hover:border-border-bright hover:bg-hover",
+      ghost: "text-secondary hover:text-primary hover:bg-elevated",
+      danger: "text-error border border-error hover:bg-error hover:text-white",
+      teal: "bg-teal text-white hover:bg-teal-bright shadow-teal",
     };
 
     const sizes = {
@@ -41,7 +53,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {children}
       </button>
     );
-  }
+  },
 );
 
 Button.displayName = "Button";

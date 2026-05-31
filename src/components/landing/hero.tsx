@@ -19,13 +19,14 @@ export function Hero() {
         </div>
 
         <h1 className="hero__heading">
-          Build queries.<br />
+          Build queries.
+          <br />
           <span className="gradient-text">Not headaches.</span>
         </h1>
 
         <p className="hero__sub">
-          Construct complex database filters visually — nested logic,
-          live previews in SQL, MongoDB, or GraphQL, zero syntax required.
+          Construct complex database filters visually — nested logic, live
+          previews in SQL, MongoDB, or GraphQL, zero syntax required.
         </p>
 
         <div className="hero__ctas">

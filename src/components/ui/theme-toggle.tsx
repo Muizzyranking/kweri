@@ -17,13 +17,14 @@ export function ThemeToggle({ className }: { className?: string }) {
         "bg-elevated border border-border",
         "hover:border-border-bright hover:bg-hover",
         "transition-all duration-200 active:scale-95 cursor-pointer",
-        className
+        className,
       )}
     >
-      {theme === "dark"
-        ? <Sun size={15} className="text-secondary" />
-        : <Moon size={15} className="text-secondary" />
-      }
+      {theme === "dark" ? (
+        <Sun size={15} className="text-secondary" />
+      ) : (
+        <Moon size={15} className="text-secondary" />
+      )}
     </button>
   );
 }

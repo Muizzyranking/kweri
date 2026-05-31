@@ -13,7 +13,14 @@ import { ThemeProvider } from "@/components/ui/theme-provider";
 export const metadata: Metadata = {
   title: "Kweri — Visual Query Builder",
   description: "Build complex database queries visually. No SQL required.",
-  keywords: ["query builder", "SQL", "MongoDB", "GraphQL", "visual", "database"],
+  keywords: [
+    "query builder",
+    "SQL",
+    "MongoDB",
+    "GraphQL",
+    "visual",
+    "database",
+  ],
   openGraph: {
     title: "Kweri — Visual Query Builder",
     description: "Build complex database queries visually. No SQL required.",

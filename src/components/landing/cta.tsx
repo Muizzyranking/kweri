@@ -8,7 +8,8 @@ export function CTA() {
       <div className="cta__glow" />
       <div className="cta__inner">
         <h2 className="cta__title">
-          Stop writing queries.<br />
+          Stop writing queries.
+          <br />
           <span className="gradient-text">Start building them.</span>
         </h2>
         <p className="cta__desc">

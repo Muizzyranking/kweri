@@ -175,7 +175,9 @@ export default function CheckoutPage() {
 
           {/* Name */}
           <div className="checkout__field">
-            <label htmlFor="cardholder-name" className="checkout__label">Cardholder name</label>
+            <label htmlFor="cardholder-name" className="checkout__label">
+              Cardholder name
+            </label>
             <input
               id="cardholder-name"
               type="text"
@@ -191,7 +193,9 @@ export default function CheckoutPage() {
 
           {/* Card number */}
           <div className="checkout__field">
-            <label htmlFor="card-number" className="checkout__label">Card number</label>
+            <label htmlFor="card-number" className="checkout__label">
+              Card number
+            </label>
             <div className="checkout__input-wrap">
               <input
                 id="card-number"
@@ -214,7 +218,9 @@ export default function CheckoutPage() {
           {/* Expiry + CVC */}
           <div className="checkout__row">
             <div className="checkout__field" style={{ marginBottom: 0 }}>
-              <label htmlFor="card-expiry" className="checkout__label">Expiry</label>
+              <label htmlFor="card-expiry" className="checkout__label">
+                Expiry
+              </label>
               <input
                 id="card-expiry"
                 type="text"
@@ -229,7 +235,9 @@ export default function CheckoutPage() {
               )}
             </div>
             <div className="checkout__field" style={{ marginBottom: 0 }}>
-              <label htmlFor="card-cvc" className="checkout__label">CVC</label>
+              <label htmlFor="card-cvc" className="checkout__label">
+                CVC
+              </label>
               <input
                 id="card-cvc"
                 type="text"
