@@ -279,7 +279,7 @@ export const useQueryStore = create<QueryStore>()(
       set((s) => ({ presets: s.presets.filter((p) => p.id !== id) }));
     },
 
-    // import / export 
+    // import / export
     exportJSON() {
       const { root, schemaName } = get();
       return JSON.stringify({ schemaName, root }, null, 2);

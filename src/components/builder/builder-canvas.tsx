@@ -27,17 +27,16 @@ export function BuilderCanvas() {
 
   const schema = useMemo(
     () => getSchemaByName(schemaName) ?? SCHEMAS[0],
-    [schemaName]
+    [schemaName],
   );
 
-  const { errors } = useMemo(
-    () => validateQuery(root, schema),
-    [root, schema]
-  );
+  const { errors } = useMemo(() => validateQuery(root, schema), [root, schema]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   );
 
   const handleDragEnd = useCallback(
@@ -66,10 +65,12 @@ export function BuilderCanvas() {
       const targetGroup = findNode(root, targetGroupId);
       if (!targetGroup || targetGroup.kind !== "group") return;
 
-      const targetIndex = targetGroup.children.findIndex((c) => c.id === over.id);
+      const targetIndex = targetGroup.children.findIndex(
+        (c) => c.id === over.id,
+      );
       moveNode(String(active.id), targetGroupId, targetIndex);
     },
-    [root, moveNode]
+    [root, moveNode],
   );
 
   return (
@@ -95,19 +96,22 @@ export function BuilderCanvas() {
 
           {/* Validation summary */}
           {errors.length > 0 && (
-            <div style={{
-              padding: "10px 14px",
-              background: "rgba(229,62,62,0.06)",
-              border: "1px solid rgba(229,62,62,0.2)",
-              borderRadius: 10,
-              fontSize: 12,
-              color: "var(--color-error)",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-            }}>
+            <div
+              style={{
+                padding: "10px 14px",
+                background: "rgba(229,62,62,0.06)",
+                border: "1px solid rgba(229,62,62,0.2)",
+                borderRadius: 10,
+                fontSize: 12,
+                color: "var(--color-error)",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+              }}
+            >
               <span>⚠</span>
-              {errors.length} validation error{errors.length !== 1 ? "s" : ""} — fix them before running the query
+              {errors.length} validation error{errors.length !== 1 ? "s" : ""} —
+              fix them before running the query
             </div>
           )}
         </main>

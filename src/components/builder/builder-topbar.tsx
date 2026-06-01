@@ -101,7 +101,12 @@ export function BuilderTopbar() {
         />
 
         {/* Reset */}
-        <button type="button" className="icon-btn" onClick={resetQuery} title="Reset query">
+        <button
+          type="button"
+          className="icon-btn"
+          onClick={resetQuery}
+          title="Reset query"
+        >
           <RotateCcw size={14} />
         </button>
 
