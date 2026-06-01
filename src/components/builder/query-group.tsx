@@ -13,12 +13,9 @@ import {
 } from "lucide-react";
 import { memo, useCallback } from "react";
 import type {
-  LogicOperator,
   QueryGroup as QueryGroupType,
   Schema,
-  ValidationError,
 } from "@/lib/query-engine/types";
-import { getNodeError, nodeHasError } from "@/lib/query-engine/validator";
 import { useQueryStore } from "@/store/query-store";
 import { QueryRule } from "./query-rule";
 import "./builder.css";
@@ -26,7 +23,7 @@ import "./builder.css";
 interface Props {
   group: QueryGroupType;
   schema: Schema;
-  errors: ValidationError[];
+  errorMap: Record<string, string>;
   isRoot?: boolean;
   depth?: number;
 }
@@ -34,25 +31,22 @@ interface Props {
 export const QueryGroup = memo(function QueryGroup({
   group,
   schema,
-  errors,
+  errorMap,
   isRoot = false,
   depth = 0,
 }: Props) {
-  const {
-    addRule,
-    addGroup,
-    removeNode,
-    updateGroupLogic,
-    toggleGroupCollapsed,
-  } = useQueryStore();
+  const addRule = useQueryStore((s) => s.addRule);
+  const addGroup = useQueryStore((s) => s.addGroup);
+  const removeNode = useQueryStore((s) => s.removeNode);
+  const updateGroupLogic = useQueryStore((s) => s.updateGroupLogic);
+  const toggleGroupCollapsed = useQueryStore((s) => s.toggleGroupCollapsed);
 
-  const hasError = nodeHasError(errors, group.id);
-  const groupError = getNodeError(errors, group.id);
+  const hasError = Boolean(errorMap[group.id]);
+  const groupError = errorMap[group.id] ?? null;
   const isCollapsed = group.collapsed ?? false;
 
   const handleLogicToggle = useCallback(() => {
-    const next: LogicOperator = group.logic === "AND" ? "OR" : "AND";
-    updateGroupLogic(group.id, next);
+    updateGroupLogic(group.id, group.logic === "AND" ? "OR" : "AND");
   }, [group.id, group.logic, updateGroupLogic]);
 
   const childIds = group.children.map((c) => c.id);
@@ -70,7 +64,6 @@ export const QueryGroup = memo(function QueryGroup({
     >
       {/* Header */}
       <div className="query-group__header">
-        {/* Logic toggle */}
         <button
           type="button"
           className={`query-group__logic-btn query-group__logic-btn--${group.logic.toLowerCase()}`}
@@ -80,16 +73,13 @@ export const QueryGroup = memo(function QueryGroup({
           {group.logic}
         </button>
 
-        {/* Meta */}
         <span className="query-group__meta">
           {group.children.length} condition
           {group.children.length !== 1 ? "s" : ""}
           {depth > 0 && ` · depth ${depth}`}
         </span>
 
-        {/* Actions */}
         <div className="query-group__actions">
-          {/* Collapse toggle */}
           <button
             type="button"
             className="query-group__collapse-btn"
@@ -103,7 +93,6 @@ export const QueryGroup = memo(function QueryGroup({
             )}
           </button>
 
-          {/* Remove group (not root) */}
           {!isRoot && (
             <button
               type="button"
@@ -124,7 +113,7 @@ export const QueryGroup = memo(function QueryGroup({
         </div>
       </div>
 
-      {/* Body — collapsible */}
+      {/* Body */}
       {!isCollapsed && (
         <>
           <div className="query-group__body">
@@ -132,30 +121,26 @@ export const QueryGroup = memo(function QueryGroup({
               items={childIds}
               strategy={verticalListSortingStrategy}
             >
-              {group.children.map((child) => {
-                if (child.kind === "rule") {
-                  return (
-                    <QueryRule
-                      key={child.id}
-                      rule={child}
-                      schema={schema}
-                      errors={errors}
-                      groupId={group.id}
-                    />
-                  );
-                }
-                // Recursive group rendering
-                return (
+              {group.children.map((child) =>
+                child.kind === "rule" ? (
+                  <QueryRule
+                    key={child.id}
+                    rule={child}
+                    schema={schema}
+                    errorMap={errorMap}
+                    groupId={group.id}
+                  />
+                ) : (
                   <QueryGroup
                     key={child.id}
                     group={child}
                     schema={schema}
-                    errors={errors}
+                    errorMap={errorMap}
                     isRoot={false}
                     depth={depth + 1}
                   />
-                );
-              })}
+                ),
+              )}
             </SortableContext>
 
             {group.children.length === 0 && (
@@ -164,13 +149,12 @@ export const QueryGroup = memo(function QueryGroup({
                 style={{ padding: "20px", minHeight: "unset" }}
               >
                 <span className="builder-empty__desc">
-                  No conditions yet — add a rule or group below
+                  No conditions yet — add one below
                 </span>
               </div>
             )}
           </div>
 
-          {/* Footer */}
           <div className="query-group__footer">
             <button
               type="button"
@@ -195,7 +179,6 @@ export const QueryGroup = memo(function QueryGroup({
         </>
       )}
 
-      {/* Group-level error */}
       {groupError && <div className="query-group__error">{groupError}</div>}
     </div>
   );

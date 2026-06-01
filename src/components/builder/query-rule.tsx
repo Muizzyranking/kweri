@@ -7,20 +7,18 @@ import { memo, useCallback } from "react";
 import type {
   QueryRule as QueryRuleType,
   Schema,
-  ValidationError,
 } from "@/lib/query-engine/types";
 import {
   OPERATOR_DEFINITIONS,
   OPERATORS_BY_TYPE,
 } from "@/lib/query-engine/types";
-import { getNodeError } from "@/lib/query-engine/validator";
 import { useQueryStore } from "@/store/query-store";
 import "./builder.css";
 
 interface Props {
   rule: QueryRuleType;
   schema: Schema;
-  errors: ValidationError[];
+  errorMap: Record<string, string>;
   groupId: string;
 }
 
@@ -33,11 +31,11 @@ function FieldTypeBadge({ type }: { type: string }) {
 export const QueryRule = memo(function QueryRule({
   rule,
   schema,
-  errors,
-  groupId: _groupId,
+  errorMap,
 }: Props) {
-  const { updateRule, removeNode } = useQueryStore();
-  const error = getNodeError(errors, rule.id);
+  const updateRule = useQueryStore((s) => s.updateRule);
+  const removeNode = useQueryStore((s) => s.removeNode);
+  const error = errorMap[rule.id] ?? null;
 
   const {
     attributes,
@@ -48,10 +46,7 @@ export const QueryRule = memo(function QueryRule({
     isDragging,
   } = useSortable({ id: rule.id });
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
+  const style = { transform: CSS.Transform.toString(transform), transition };
 
   const field = schema.fields.find((f) => f.name === rule.field);
   const fieldType = field?.type ?? "string";
@@ -63,7 +58,6 @@ export const QueryRule = memo(function QueryRule({
       const newField = e.target.value;
       const newFieldDef = schema.fields.find((f) => f.name === newField);
       if (!newFieldDef) return;
-      // pick first valid operator for new type
       const firstOp = OPERATORS_BY_TYPE[newFieldDef.type][0];
       updateRule(rule.id, {
         field: newField,
@@ -82,24 +76,24 @@ export const QueryRule = memo(function QueryRule({
     [rule.id, updateRule],
   );
 
-  const handleValueChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      updateRule(rule.id, { value: e.target.value });
-    },
+  const handleValue = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+      updateRule(rule.id, { value: e.target.value }),
     [rule.id, updateRule],
   );
 
-  const handleValueToChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      updateRule(rule.id, { valueTo: e.target.value });
-    },
+  const handleValueTo = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      updateRule(rule.id, { valueTo: e.target.value }),
     [rule.id, updateRule],
   );
 
-  const renderValueInput = () => {
+  const renderValue = () => {
     if (!opDef || opDef.arity === 0) return null;
 
-    // Enum field with equals/not_equals → dropdown
+    const errClass = error ? "query-rule__input--error" : "";
+
+    // Enum dropdown
     if (
       fieldType === "enum" &&
       (rule.operator === "equals" || rule.operator === "not_equals") &&
@@ -107,11 +101,11 @@ export const QueryRule = memo(function QueryRule({
     ) {
       return (
         <select
-          className={`query-rule__select ${error ? "query-rule__input--error" : ""}`}
+          className={`query-rule__select ${errClass}`}
           value={rule.value ?? ""}
-          onChange={handleValueChange}
+          onChange={handleValue}
         >
-          <option value="">Select value…</option>
+          <option value="">Select…</option>
           {field.enumValues.map((v) => (
             <option key={v} value={v}>
               {v}
@@ -121,13 +115,13 @@ export const QueryRule = memo(function QueryRule({
       );
     }
 
-    // Boolean field → dropdown
+    // Boolean dropdown
     if (fieldType === "boolean" && rule.operator === "equals") {
       return (
         <select
-          className={`query-rule__select ${error ? "query-rule__input--error" : ""}`}
+          className={`query-rule__select ${errClass}`}
           value={rule.value ?? ""}
-          onChange={handleValueChange}
+          onChange={handleValue}
         >
           <option value="">Select…</option>
           <option value="true">true</option>
@@ -136,61 +130,63 @@ export const QueryRule = memo(function QueryRule({
       );
     }
 
-    // Date field → date input
+    // Date range (between)
+    if (opDef.arity === 2 && fieldType === "date") {
+      return (
+        <>
+          <input
+            type="date"
+            className={`query-rule__input ${errClass}`}
+            value={rule.value ?? ""}
+            onChange={handleValue}
+            style={{ minWidth: 130 }}
+          />
+          <span className="query-rule__between-sep">and</span>
+          <input
+            type="date"
+            className={`query-rule__input ${errClass}`}
+            value={rule.valueTo ?? ""}
+            onChange={handleValueTo}
+            style={{ minWidth: 130 }}
+          />
+        </>
+      );
+    }
+
+    // Date single
     if (
       fieldType === "date" ||
       ["before", "after", "on_date"].includes(rule.operator)
     ) {
-      if (opDef.arity === 2) {
-        return (
-          <>
-            <input
-              type="date"
-              className={`query-rule__input ${error ? "query-rule__input--error" : ""}`}
-              value={rule.value ?? ""}
-              onChange={handleValueChange}
-              style={{ minWidth: 130 }}
-            />
-            <span className="query-rule__between-sep">and</span>
-            <input
-              type="date"
-              className={`query-rule__input ${error ? "query-rule__input--error" : ""}`}
-              value={rule.valueTo ?? ""}
-              onChange={handleValueToChange}
-              style={{ minWidth: 130 }}
-            />
-          </>
-        );
-      }
       return (
         <input
           type="date"
-          className={`query-rule__input ${error ? "query-rule__input--error" : ""}`}
+          className={`query-rule__input ${errClass}`}
           value={rule.value ?? ""}
-          onChange={handleValueChange}
+          onChange={handleValue}
         />
       );
     }
 
-    // Number between
-    if (fieldType === "number" && opDef.arity === 2) {
+    // Number range (between)
+    if (opDef.arity === 2 && fieldType === "number") {
       return (
         <>
           <input
             type="number"
-            className={`query-rule__input ${error ? "query-rule__input--error" : ""}`}
+            className={`query-rule__input ${errClass}`}
             placeholder="from"
             value={rule.value ?? ""}
-            onChange={handleValueChange}
+            onChange={handleValue}
             style={{ minWidth: 80 }}
           />
           <span className="query-rule__between-sep">and</span>
           <input
             type="number"
-            className={`query-rule__input ${error ? "query-rule__input--error" : ""}`}
+            className={`query-rule__input ${errClass}`}
             placeholder="to"
             value={rule.valueTo ?? ""}
-            onChange={handleValueToChange}
+            onChange={handleValueTo}
             style={{ minWidth: 80 }}
           />
         </>
@@ -202,49 +198,49 @@ export const QueryRule = memo(function QueryRule({
       return (
         <input
           type="number"
-          className={`query-rule__input ${error ? "query-rule__input--error" : ""}`}
+          className={`query-rule__input ${errClass}`}
           placeholder="value"
           value={rule.value ?? ""}
-          onChange={handleValueChange}
+          onChange={handleValue}
         />
       );
     }
 
-    // in_array / not_in_array — comma hint
+    // Array operators
     if (rule.operator === "in_array" || rule.operator === "not_in_array") {
       return (
         <input
           type="text"
-          className={`query-rule__input ${error ? "query-rule__input--error" : ""}`}
+          className={`query-rule__input ${errClass}`}
           placeholder="val1, val2, val3"
           value={rule.value ?? ""}
-          onChange={handleValueChange}
+          onChange={handleValue}
         />
       );
     }
 
-    // regex
+    // Regex
     if (rule.operator === "regex") {
       return (
         <input
           type="text"
-          className={`query-rule__input ${error ? "query-rule__input--error" : ""}`}
-          placeholder="^regex.*pattern$"
+          className={`query-rule__input ${errClass}`}
+          placeholder="^regex.*"
           value={rule.value ?? ""}
-          onChange={handleValueChange}
+          onChange={handleValue}
           style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}
         />
       );
     }
 
-    // default string
+    // Default string
     return (
       <input
         type="text"
-        className={`query-rule__input ${error ? "query-rule__input--error" : ""}`}
+        className={`query-rule__input ${errClass}`}
         placeholder="value"
         value={rule.value ?? ""}
-        onChange={handleValueChange}
+        onChange={handleValue}
       />
     );
   };
@@ -255,14 +251,11 @@ export const QueryRule = memo(function QueryRule({
       style={style}
       className={`query-rule ${error ? "query-rule--error" : ""} ${isDragging ? "query-rule--dragging" : ""}`}
     >
-      {/* Drag handle */}
       <div className="query-rule__drag-handle" {...attributes} {...listeners}>
         <GripVertical size={14} />
       </div>
 
-      {/* Fields */}
       <div className="query-rule__fields">
-        {/* Field selector */}
         <select
           className="query-rule__select query-rule__select--field"
           value={rule.field}
@@ -276,10 +269,8 @@ export const QueryRule = memo(function QueryRule({
           ))}
         </select>
 
-        {/* Field type badge */}
         {field && <FieldTypeBadge type={fieldType} />}
 
-        {/* Operator selector */}
         <select
           className="query-rule__select query-rule__select--operator"
           value={rule.operator}
@@ -292,11 +283,9 @@ export const QueryRule = memo(function QueryRule({
           ))}
         </select>
 
-        {/* Value input(s) */}
-        {renderValueInput()}
+        {renderValue()}
       </div>
 
-      {/* Remove button */}
       <button
         type="button"
         className="query-rule__remove"
@@ -306,7 +295,6 @@ export const QueryRule = memo(function QueryRule({
         <X size={13} />
       </button>
 
-      {/* Inline error */}
       {error && <span className="query-rule__error-msg">{error}</span>}
     </div>
   );
