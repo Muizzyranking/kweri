@@ -3,6 +3,7 @@
 import { ArrowRight, CheckCircle, CreditCard, Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { KweriWordmark } from "@/components/ui/logo";
 import "@/components/landing/landing.css";
 
 type Stage = "payment" | "processing" | "joke";
@@ -121,10 +122,7 @@ export default function CheckoutPage() {
       <div className="checkout__card">
         {/* Logo */}
         <div className="checkout__logo">
-          <div className="checkout__logo-icon">
-            <span>K</span>
-          </div>
-          <span className="checkout__logo-name">Kweri</span>
+          <KweriWordmark size={28} />
         </div>
         <h1 className="checkout__heading">Unlock Kweri Pro</h1>
         <p className="checkout__subheading">
