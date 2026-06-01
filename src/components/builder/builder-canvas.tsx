@@ -18,7 +18,9 @@ import { useQueryStore } from "@/store/query-store";
 import { BuilderSidebar } from "./builder-sidebar";
 import { BuilderTopbar } from "./builder-topbar";
 import { QueryGroup } from "./query-group";
+import { ResultsPanel } from "./results-panel";
 import "./builder.css";
+import "./results.css";
 
 export function BuilderCanvas() {
   const root = useQueryStore((s) => s.root);
@@ -32,6 +34,12 @@ export function BuilderCanvas() {
 
   const { errors } = useMemo(() => validateQuery(root, schema), [root, schema]);
 
+  const errorMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const e of errors) map[e.nodeId] = e.message;
+    return map;
+  }, [errors]);
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor, {
@@ -44,10 +52,9 @@ export function BuilderCanvas() {
       const { active, over } = event;
       if (!over || active.id === over.id) return;
 
-      const findParentGroup = (_: string): string | null => {
+      const findParentGroupId = (): string | null => {
         const walk = (g: typeof root): string | null => {
-          for (let i = 0; i < g.children.length; i++) {
-            const child = g.children[i];
+          for (const child of g.children) {
             if (child.id === over.id) return g.id;
             if (child.kind === "group") {
               const found = walk(child);
@@ -59,7 +66,7 @@ export function BuilderCanvas() {
         return walk(root);
       };
 
-      const targetGroupId = findParentGroup(String(over.id));
+      const targetGroupId = findParentGroupId();
       if (!targetGroupId) return;
 
       const targetGroup = findNode(root, targetGroupId);
@@ -77,9 +84,18 @@ export function BuilderCanvas() {
     <div className="builder-page">
       <BuilderTopbar />
 
-      <div className="builder-body">
-        {/* Main canvas */}
-        <main className="builder-main">
+      <div
+        className="builder-body"
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 380px",
+          gridTemplateRows: "1fr 340px",
+          minHeight: 0,
+          overflow: "hidden",
+        }}
+      >
+        {/* Main canvas — top left */}
+        <main className="builder-main" style={{ gridColumn: 1, gridRow: 1 }}>
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
@@ -88,13 +104,12 @@ export function BuilderCanvas() {
             <QueryGroup
               group={root}
               schema={schema}
-              errors={errors}
+              errorMap={errorMap}
               isRoot
               depth={0}
             />
           </DndContext>
 
-          {/* Validation summary */}
           {errors.length > 0 && (
             <div
               style={{
@@ -109,17 +124,28 @@ export function BuilderCanvas() {
                 gap: 8,
               }}
             >
-              <span>⚠</span>
+              <span>!</span>
               {errors.length} validation error{errors.length !== 1 ? "s" : ""} —
               fix them before running the query
             </div>
           )}
         </main>
 
-        {/* Sidebar */}
-        <aside className="builder-sidebar">
+        {/* Sidebar — right column, full height */}
+        <aside
+          className="builder-sidebar"
+          style={{ gridColumn: 2, gridRow: "1 / 3" }}
+        >
           <BuilderSidebar />
         </aside>
+
+        {/* Results panel — bottom left */}
+        <div className="builder-lower" style={{ gridColumn: 1, gridRow: 2 }}>
+          <div className="builder-lower__header">
+            <span className="builder-lower__title">Results</span>
+          </div>
+          <ResultsPanel />
+        </div>
       </div>
     </div>
   );
