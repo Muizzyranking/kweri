@@ -3,6 +3,7 @@
 import { Moon, Sun } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { KweriWordmark } from "@/components/ui/logo";
 import { useTheme } from "@/components/ui/theme-provider";
 import "./landing.css";
 import { LINKS } from "@/data/landing/nav";
@@ -21,10 +22,7 @@ export function Navbar() {
     <header className={`nav ${scrolled ? "nav--scrolled" : ""}`}>
       <div className="nav__inner">
         <Link href="/" className="nav__logo">
-          <div className="nav__logo-icon">
-            <span>K</span>
-          </div>
-          <span className="nav__logo-name">Kweri</span>
+          <KweriWordmark size={28} />
         </Link>
 
         <nav className="nav__links">

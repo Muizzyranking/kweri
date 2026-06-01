@@ -21,6 +21,11 @@ export const metadata: Metadata = {
     "visual",
     "database",
   ],
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
   openGraph: {
     title: "Kweri — Visual Query Builder",
     description: "Build complex database queries visually. No SQL required.",

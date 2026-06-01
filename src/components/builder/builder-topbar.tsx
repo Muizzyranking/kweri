@@ -1,8 +1,17 @@
 "use client";
 
-import { Download, Moon, RotateCcw, Sun, Upload } from "lucide-react";
+import {
+  Database,
+  Download,
+  FilePlus,
+  Moon,
+  RotateCcw,
+  Sun,
+  Upload,
+} from "lucide-react";
 import Link from "next/link";
 import { useRef } from "react";
+import { KweriLogoMark } from "@/components/ui/logo";
 import { useTheme } from "@/components/ui/theme-provider";
 import { useQueryStore } from "@/store/query-store";
 import { SchemaSelector } from "./schema-selector";
@@ -37,20 +46,24 @@ export function BuilderTopbar() {
     e.target.value = "";
   };
 
+  const handleNewQuery = () => {
+    pushHistory("Auto-saved before new query");
+    resetQuery();
+  };
+
   return (
     <div className="builder-topbar">
       {/* Left */}
       <div className="builder-topbar__left">
         <Link href="/" className="builder-topbar__logo">
-          <div className="builder-topbar__logo-icon">
-            <span>K</span>
-          </div>
+          <KweriLogoMark size={28} />
           <span
             style={{
               fontFamily: "var(--font-display)",
               fontSize: 15,
-              fontWeight: 600,
+              fontWeight: 700,
               color: "var(--color-primary)",
+              letterSpacing: "-0.02em",
             }}
           >
             Kweri
@@ -63,6 +76,25 @@ export function BuilderTopbar() {
 
       {/* Right */}
       <div className="builder-topbar__right">
+        {/* New Query */}
+        <button
+          type="button"
+          className="bdr-btn bdr-btn--secondary"
+          onClick={handleNewQuery}
+          title="Save current and start a new query"
+          style={{ gap: 6 }}
+        >
+          <FilePlus size={13} />
+          New query
+        </button>
+
+        {/* Schemas page */}
+        <Link href="/schemas">
+          <button type="button" className="icon-btn" title="Manage schemas">
+            <Database size={14} />
+          </button>
+        </Link>
+
         {/* Save to history */}
         <button
           type="button"
