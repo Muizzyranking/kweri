@@ -9,6 +9,7 @@ import {
   ChevronsRight,
   Play,
 } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
 import { getDataBySchema } from "@/lib/mock-data";
 import { executeQuery } from "@/lib/query-engine/executor";
@@ -25,11 +26,15 @@ type SortDir = "asc" | "desc";
 export function ResultsPanel() {
   const root = useQueryStore((s) => s.root);
   const schemaName = useQueryStore((s) => s.schemaName);
+  const customSchemas = useQueryStore((s) => s.customSchemas);
 
   const schema = useMemo(
     () => getSchemaByName(schemaName) ?? SCHEMAS[0],
     [schemaName],
   );
+
+  const isCustomSchema = customSchemas.some((s) => s.name === schemaName);
+  const isBuiltinSchema = SCHEMAS.some((s) => s.name === schemaName);
 
   const [hasRun, setHasRun] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -176,8 +181,14 @@ export function ResultsPanel() {
             type="button"
             className="run-bar__btn"
             onClick={handleRun}
-            disabled={loading || !valid}
-            title={!valid ? "Fix validation errors first" : "Run query"}
+            disabled={loading || !valid || isCustomSchema}
+            title={
+              isCustomSchema
+                ? "No execution backend for custom schemas"
+                : !valid
+                  ? "Fix validation errors first"
+                  : "Run query"
+            }
           >
             <Play size={13} fill="currentColor" />
             {loading ? "Running…" : "Run query"}
@@ -186,7 +197,42 @@ export function ResultsPanel() {
       </div>
 
       {/* Body */}
-      {!hasRun && (
+      {/* Custom schema — no execution backend */}
+      {isCustomSchema && !isBuiltinSchema && (
+        <div className="results-empty" style={{ flex: 1 }}>
+          <div className="results-empty__icon">🔌</div>
+          <div className="results-empty__title">No execution backend</div>
+          <div className="results-empty__desc">
+            Custom schemas don&apos;t have a data source to run against. Use the
+            query preview to copy the generated SQL, MongoDB, or GraphQL and run
+            it in your own database.
+          </div>
+          <Link href="/schemas" style={{ textDecoration: "none" }}>
+            <button
+              type="button"
+              style={{
+                marginTop: 8,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "7px 16px",
+                height: 32,
+                borderRadius: 8,
+                border: "1px solid var(--color-border)",
+                background: "var(--color-elevated)",
+                color: "var(--color-secondary)",
+                fontSize: 12,
+                cursor: "pointer",
+                fontFamily: "var(--font-body)",
+              }}
+            >
+              Manage schemas
+            </button>
+          </Link>
+        </div>
+      )}
+
+      {!isCustomSchema && !hasRun && (
         <div className="results-empty" style={{ flex: 1 }}>
           <div className="results-empty__icon">▷</div>
           <div className="results-empty__title">Ready to run</div>
@@ -197,118 +243,126 @@ export function ResultsPanel() {
         </div>
       )}
 
-      {hasRun && loading && (
+      {!isCustomSchema && hasRun && loading && (
         <div className="results-loading" style={{ flex: 1 }}>
           <div className="results-loading__spinner" />
           Executing query…
         </div>
       )}
 
-      {hasRun && !loading && pagedResults && pagedResults.matched === 0 && (
-        <div className="results-empty" style={{ flex: 1 }}>
-          <div className="results-empty__icon">🔍</div>
-          <div className="results-empty__title">No results</div>
-          <div className="results-empty__desc">
-            No rows matched your query. Try relaxing your conditions.
-          </div>
-        </div>
-      )}
-
-      {hasRun && !loading && pagedResults && pagedResults.matched > 0 && (
-        <>
-          {/* Table */}
-          <div className="results-table-wrap">
-            <table className="results-table">
-              <thead>
-                <tr>
-                  {schema.fields.map((f) => (
-                    <th
-                      key={f.name}
-                      className={sortField === f.name ? "sorted" : ""}
-                      onClick={() => handleSort(f.name)}
-                    >
-                      {f.label ?? f.name}
-                      {sortField === f.name ? (
-                        <span className="sort-indicator">
-                          {sortDir === "asc" ? (
-                            <ArrowUp size={9} />
-                          ) : (
-                            <ArrowDown size={9} />
-                          )}
-                        </span>
-                      ) : (
-                        <span
-                          className="sort-indicator"
-                          style={{ opacity: 0.2 }}
-                        >
-                          ↕
-                        </span>
-                      )}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {pagedResults.rows.map((row, i) => (
-                  <tr key={`${row.id ?? i}`}>
-                    {schema.fields.map((f) => (
-                      <td key={f.name}>
-                        {formatCell(row[f.name], getFieldType(f.name))}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          <div className="results-pagination">
-            <span className="results-pagination__info">
-              {(page - 1) * PAGE_SIZE + 1}–
-              {Math.min(page * PAGE_SIZE, pagedResults.matched)} of{" "}
-              {pagedResults.matched}
-            </span>
-            <div className="results-pagination__controls">
-              <button
-                type="button"
-                className="results-pagination__btn"
-                onClick={() => setPage(1)}
-                disabled={page === 1}
-              >
-                <ChevronsLeft size={12} />
-              </button>
-              <button
-                type="button"
-                className="results-pagination__btn"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-              >
-                <ChevronLeft size={12} />
-              </button>
-              <span className="results-pagination__page">
-                {page} / {totalPages}
-              </span>
-              <button
-                type="button"
-                className="results-pagination__btn"
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-              >
-                <ChevronRight size={12} />
-              </button>
-              <button
-                type="button"
-                className="results-pagination__btn"
-                onClick={() => setPage(totalPages)}
-                disabled={page === totalPages}
-              >
-                <ChevronsRight size={12} />
-              </button>
+      {!isCustomSchema &&
+        hasRun &&
+        !loading &&
+        pagedResults &&
+        pagedResults.matched === 0 && (
+          <div className="results-empty" style={{ flex: 1 }}>
+            <div className="results-empty__icon">🔍</div>
+            <div className="results-empty__title">No results</div>
+            <div className="results-empty__desc">
+              No rows matched your query. Try relaxing your conditions.
             </div>
           </div>
-        </>
-      )}
+        )}
+
+      {!isCustomSchema &&
+        hasRun &&
+        !loading &&
+        pagedResults &&
+        pagedResults.matched > 0 && (
+          <>
+            {/* Table */}
+            <div className="results-table-wrap">
+              <table className="results-table">
+                <thead>
+                  <tr>
+                    {schema.fields.map((f) => (
+                      <th
+                        key={f.name}
+                        className={sortField === f.name ? "sorted" : ""}
+                        onClick={() => handleSort(f.name)}
+                      >
+                        {f.label ?? f.name}
+                        {sortField === f.name ? (
+                          <span className="sort-indicator">
+                            {sortDir === "asc" ? (
+                              <ArrowUp size={9} />
+                            ) : (
+                              <ArrowDown size={9} />
+                            )}
+                          </span>
+                        ) : (
+                          <span
+                            className="sort-indicator"
+                            style={{ opacity: 0.2 }}
+                          >
+                            ↕
+                          </span>
+                        )}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {pagedResults.rows.map((row, i) => (
+                    <tr key={`${row.id ?? i}`}>
+                      {schema.fields.map((f) => (
+                        <td key={f.name}>
+                          {formatCell(row[f.name], getFieldType(f.name))}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            <div className="results-pagination">
+              <span className="results-pagination__info">
+                {(page - 1) * PAGE_SIZE + 1}–
+                {Math.min(page * PAGE_SIZE, pagedResults.matched)} of{" "}
+                {pagedResults.matched}
+              </span>
+              <div className="results-pagination__controls">
+                <button
+                  type="button"
+                  className="results-pagination__btn"
+                  onClick={() => setPage(1)}
+                  disabled={page === 1}
+                >
+                  <ChevronsLeft size={12} />
+                </button>
+                <button
+                  type="button"
+                  className="results-pagination__btn"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                >
+                  <ChevronLeft size={12} />
+                </button>
+                <span className="results-pagination__page">
+                  {page} / {totalPages}
+                </span>
+                <button
+                  type="button"
+                  className="results-pagination__btn"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                >
+                  <ChevronRight size={12} />
+                </button>
+                <button
+                  type="button"
+                  className="results-pagination__btn"
+                  onClick={() => setPage(totalPages)}
+                  disabled={page === totalPages}
+                >
+                  <ChevronsRight size={12} />
+                </button>
+              </div>
+            </div>
+          </>
+        )}
     </div>
   );
 }
