@@ -2,8 +2,8 @@ export const STEPS = [
   {
     number: "01",
     title: "Pick your schema",
-    desc: "Choose from built-in schemas — users, orders, products — or define your own. Kweri adapts the entire UI to your data shape.",
-    detail: "users · orders · products · custom",
+    desc: "Choose from built-in sci-fi schemas - players, planets, missions, weapons - or define your own. Kweri adapts the entire UI to your data shape.",
+    detail: "players · planets · missions · weapons",
     accent: "orange",
   },
   {
@@ -23,7 +23,7 @@ export const STEPS = [
   {
     number: "04",
     title: "Run & inspect results",
-    desc: "Execute against a mock dataset. See matching records, counts, and paginated results instantly.",
+    desc: "Execute against fictional game and space datasets. See matching records, counts, and paginated results instantly.",
     detail: "real-time filtering",
     accent: "teal",
   },

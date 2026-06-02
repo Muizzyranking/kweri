@@ -122,6 +122,7 @@ export type LogicOperator = "AND" | "OR";
 export interface QueryRule {
   id: string;
   kind: "rule";
+  connector?: LogicOperator;
   field: string;
   operator: Operator;
   /** Single value for arity=1, undefined for arity=0 */
@@ -133,6 +134,7 @@ export interface QueryRule {
 export interface QueryGroup {
   id: string;
   kind: "group";
+  connector?: LogicOperator;
   logic: LogicOperator;
   children: QueryNode[];
   collapsed?: boolean;

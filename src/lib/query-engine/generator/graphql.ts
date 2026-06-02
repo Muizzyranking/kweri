@@ -66,17 +66,23 @@ function groupToGraphQL(group: QueryGroup, schema: Schema, indent = 2): string {
   if (group.children.length === 0) return "";
 
   const pad = " ".repeat(indent);
-  const logic = group.logic === "AND" ? "AND" : "OR";
 
-  const parts = group.children.map((child) => {
-    if (child.kind === "rule") return `${pad}  ${ruleToGraphQL(child, schema)}`;
+  const parts = group.children.map((child, index) => {
+    const connector = index === 0 ? null : (child.connector ?? group.logic);
+    const prefix = connector ? `${pad}  ${connector}: ` : "";
+    if (child.kind === "rule") {
+      const rule = ruleToGraphQL(child, schema);
+      return connector ? `${prefix}{ ${rule} }` : `${pad}  ${rule}`;
+    }
     const inner = groupToGraphQL(child, schema, indent + 4);
-    return `${pad}  ${logic}: {\n${inner}\n${pad}  }`;
+    return connector
+      ? `${prefix}{\n${inner}\n${pad}  }`
+      : `${pad}  {\n${inner}\n${pad}  }`;
   });
 
   const joined = parts.join("\n");
   if (group.children.length === 1) return joined;
-  return `${pad}${logic}: {\n${joined}\n${pad}}`;
+  return joined;
 }
 
 export function generateGraphQL(root: QueryGroup, schema: Schema): string {

@@ -1,227 +1,280 @@
-// USERS MOCK DATA
-const COUNTRIES = [
-  "Nigeria",
-  "Ghana",
-  "Kenya",
-  "South Africa",
-  "Egypt",
-  "UK",
-  "USA",
-  "Canada",
-  "Germany",
-  "France",
-];
-const STATUSES_USER = ["active", "inactive", "pending", "banned"] as const;
-const NAMES = [
-  "Amara Nwosu",
-  "Kofi Mensah",
-  "Zainab Okafor",
-  "David Adeyemi",
-  "Fatima Bello",
-  "Emeka Eze",
-  "Aisha Hassan",
-  "Tunde Bakare",
-  "Ngozi Okonkwo",
-  "Yusuf Abdullahi",
-  "Chioma Obi",
-  "Seun Adesanya",
-  "Ada Obi",
-  "Bayo Olawale",
-  "Kemi Adebayo",
-  "Olumide Fashola",
-  "Ify Okafor",
-  "Damilola Salako",
-  "Chidi Okeke",
-  "Funke Akindele",
-  "James Smith",
-  "Maria Garcia",
-  "Wei Chen",
-  "Priya Patel",
-  "Omar Hassan",
-  "Lena Müller",
-  "Lucas Martin",
-  "Sofia Rossi",
-  "Andrei Popescu",
-  "Ana Silva",
-  "Elena Ivanova",
-  "Mehmet Yilmaz",
-  "Fatou Diallo",
-  "Kwame Asante",
-  "Blessing Osei",
-  "Taiwo Adeoye",
-  "Chiamaka Uba",
-  "Hakeem Olajide",
-  "Rukayat Sanni",
-  "Biodun Fasanya",
-  "Nnamdi Okoro",
-  "Uchechi Nwankwo",
-  "Gbenga Afolabi",
-  "Tolani Adeyinka",
-  "Abike Lawson",
-  "Rotimi Adesina",
-  "Folake Ogundimu",
-  "Ade Ogundele",
-  "Sade Makinde",
-  "Tolu Abiola",
+const PLANET_NAMES = [
+  "Virelia-9",
+  "Kepler Rift",
+  "Astra Prime",
+  "Nyx Hollow",
+  "Eos Drifts",
+  "Caldera Vox",
+  "Lumen Reach",
+  "Obsidian Ark",
+  "Thalassa Verge",
+  "Cryon Delta",
 ];
 
-export const USERS_DATA = NAMES.map((name, i) => ({
-  id: i + 1,
-  name,
-  email: `${name.toLowerCase().replace(/\s+/g, ".")}@example.com`,
-  age: 18 + Math.floor(Math.abs(Math.sin(i * 7.3) * 45)),
-  country: COUNTRIES[i % COUNTRIES.length],
-  status: STATUSES_USER[i % STATUSES_USER.length],
-  createdAt: new Date(2022, i % 12, (i % 28) + 1).toISOString().split("T")[0],
-  purchases: Math.floor(Math.abs(Math.cos(i * 3.7) * 80)),
-}));
-
-// ORDERS MOCK DATA
-const PRODUCTS_LIST = [
-  "MacBook Pro",
-  "iPhone 15",
-  "Samsung Galaxy S24",
-  "Sony WH-1000XM5",
-  "iPad Air",
-  "AirPods Pro",
-  "Dell XPS 15",
-  "LG OLED TV",
-  "Nintendo Switch",
-  "PS5",
-  "Nike Air Max",
-  "Adidas Ultraboost",
-  "Levi's Jeans",
-  "Zara Jacket",
-  "H&M Hoodie",
-  "The Alchemist",
-  "Atomic Habits",
-  "Rich Dad Poor Dad",
-  "Zero to One",
-  "Deep Work",
-  "Whey Protein",
-  "Yoga Mat",
-  "Dumbbells Set",
-  "Running Shoes",
-  "Gym Gloves",
-  "Coffee Maker",
-  "Blender",
-  "Air Fryer",
-  "Rice Cooker",
-  "Microwave",
+const SECTORS = [
+  "Orion Spur",
+  "Vela Expanse",
+  "Perseus Arm",
+  "Helix Gate",
+  "Crab Veil",
+  "Sable Quadrant",
+  "Zenith Belt",
+  "Eclipse Reach",
 ];
-const STATUSES_ORDER = [
-  "pending",
-  "processing",
-  "shipped",
-  "delivered",
-  "cancelled",
+
+export const ARCHITECT_NAMES = [
+  "Abdul Tsx",
+  "Coded Libra",
+  "Explorer",
+  "Shalom",
+  "The Shinobi",
+  "Xenon",
+  "Phuhard",
+  "Adaeze",
+  "Mantle Bearer",
+  "Damola",
+  "Naza Listic",
+  "Ejiro Frances",
+  "Aunty Debo",
+  "Enesi Dev",
+  "El Tana",
+  "Basi",
+  "Yeehsa Dev",
+  "Her Chaos",
+  "Tems",
+  "Sugar",
+  "Big Daddy",
+  "Kami Sama",
+];
+
+export const APPRENTICE_NAMES = [
+  "Muizzy Ranking",
+  "Human AI",
+  "Joanna Bassey",
+  "Kelechi Uba",
+  "Don Victory",
+  "Grace Ogbenfore",
+  "Blessing Ayuba",
+  "Grace Ogbenfore",
+  "Afuni Mawobe",
+  "Truella",
+  "Teo is VijuMilk",
+  "The Neverdone",
+  "Grey Thedev",
+  "Lee Yousuf",
+  "Lee Yousuf",
+  "Uju Joy",
+  "Kill Switch",
+  "Trojan",
+  "Zubee",
+];
+
+const WANDERER_NAMES = [
+  "Ghost Meridian",
+  "Void Kestrel",
+  "Neon Quasar",
+  "Argon Wake",
+  "Drift Aegis",
+  "Helix Storm",
+  "Flux Runner",
+  "Vector Ash",
+  "Shard Ranger",
+  "Cobalt Wing",
+  "Zero Horizon",
+  "Lunar Pike",
+  "Omega Trace",
+  "Rift Sable",
+  "Echo Vale",
+  "Solar Kite",
+  "Ion Ember",
+  "Comet Rook",
+  "Prism Echo",
+  "Apex Nyx",
+];
+
+const RANK_TIERS = ["initiate", "adept", "elite", "mythic"] as const;
+const GUILDS = [
+  "Keystone Circle",
+  "Signal Forge",
+  "Orbit Foundry",
+  "Helix Archive",
+  "Void Cartel",
+  "Northstar Relay",
+];
+
+function makePlayer(
+  callsign: string,
+  role: "architect" | "apprentice" | "wanderer",
+  i: number,
+  globalOffset: number,
+) {
+  const mentor =
+    role === "apprentice"
+      ? ARCHITECT_NAMES[i % ARCHITECT_NAMES.length]
+      : role === "wanderer"
+        ? WANDERER_NAMES[(i + 3) % WANDERER_NAMES.length]
+        : "";
+
+  return {
+    id: globalOffset + i + 1,
+    callsign,
+    role,
+    rankTier:
+      RANK_TIERS[Math.floor(Math.abs(Math.sin(globalOffset * 1.6) * 4)) % 4],
+    originWorld: PLANET_NAMES[globalOffset % PLANET_NAMES.length],
+    sector: SECTORS[globalOffset % SECTORS.length],
+    guild: GUILDS[globalOffset % GUILDS.length],
+    rank: 1 + Math.floor(Math.abs(Math.sin(globalOffset * 4.7) * 99)),
+    xp: Math.floor(Math.abs(Math.cos(globalOffset * 2.9) * 1_250_000) + 5_000),
+    missionsCompleted: Math.floor(Math.abs(Math.sin(globalOffset * 3.4) * 260)),
+    mentorScore:
+      role === "architect"
+        ? 60 + Math.floor(Math.abs(Math.sin(globalOffset) * 40))
+        : 0,
+    apprenticeScore:
+      role === "apprentice"
+        ? 35 + Math.floor(Math.abs(Math.cos(globalOffset * 1.3) * 65))
+        : 0,
+    signalIntegrity: Math.floor(Math.abs(Math.cos(globalOffset * 2.1) * 100)),
+    credits: Math.round(
+      Math.abs(Math.sin(globalOffset * 5.1) * 140_000) + 1_000,
+    ),
+    mentorCallsign: mentor,
+    active: globalOffset % 5 !== 0,
+    joinedAt: new Date(2421, globalOffset % 12, (globalOffset % 28) + 1)
+      .toISOString()
+      .split("T")[0],
+    lastSignal: new Date(2426, globalOffset % 12, (globalOffset % 28) + 1)
+      .toISOString()
+      .split("T")[0],
+  };
+}
+
+export const PLAYERS_DATA = [
+  ...ARCHITECT_NAMES.map((name, i) => makePlayer(name, "architect", i, i)),
+  ...APPRENTICE_NAMES.map((name, i) =>
+    makePlayer(name, "apprentice", i, ARCHITECT_NAMES.length + i),
+  ),
+  ...WANDERER_NAMES.map((name, i) =>
+    makePlayer(
+      name,
+      "wanderer",
+      i,
+      ARCHITECT_NAMES.length + APPRENTICE_NAMES.length + i,
+    ),
+  ),
+];
+
+const BIOMES = [
+  "desert",
+  "ice",
+  "ocean",
+  "volcanic",
+  "jungle",
+  "nebula",
 ] as const;
-const REGIONS = [
-  "Lagos",
-  "Accra",
-  "Nairobi",
-  "Cairo",
-  "London",
-  "New York",
-  "Berlin",
-  "Paris",
-  "Toronto",
-  "Dubai",
-];
 
-export const ORDERS_DATA = Array.from({ length: 50 }, (_, i) => ({
+export const PLANETS_DATA = Array.from({ length: 48 }, (_, i) => ({
   id: i + 1,
-  userId: (i % 30) + 1,
-  product: PRODUCTS_LIST[i % PRODUCTS_LIST.length],
-  total: Math.round(Math.abs(Math.sin(i * 4.1) * 2000) + 9.99),
-  status: STATUSES_ORDER[i % STATUSES_ORDER.length],
-  region: REGIONS[i % REGIONS.length],
-  createdAt: new Date(2023, i % 12, (i % 28) + 1).toISOString().split("T")[0],
-  refunded: i % 7 === 0,
+  name: PLANET_NAMES[i % PLANET_NAMES.length],
+  biome: BIOMES[i % BIOMES.length],
+  sector: SECTORS[i % SECTORS.length],
+  distanceLy: Math.round((Math.abs(Math.sin(i * 3.1) * 680) + 4.2) * 10) / 10,
+  gravity: Math.round((0.4 + Math.abs(Math.cos(i * 1.8) * 2.6)) * 100) / 100,
+  hazardLevel: 1 + Math.floor(Math.abs(Math.sin(i * 5.2) * 9)),
+  colonized: i % 4 === 0 || i % 9 === 0,
+  discoveredAt: new Date(2418, i % 12, (i % 28) + 1)
+    .toISOString()
+    .split("T")[0],
 }));
 
-// PRODUCTS MOCK DATA
-const CATEGORIES = [
-  "electronics",
-  "clothing",
-  "food",
-  "books",
-  "sports",
-  "home",
+const MISSION_NAMES = [
+  "Glass Horizon",
+  "Silent Comet",
+  "Night Beacon",
+  "Starlance",
+  "Frost Vector",
+  "Dustwake",
+  "Black Aurora",
+  "Signal Bloom",
+  "Crimson Orbit",
+  "Deep Lantern",
+  "Neon Bastion",
+  "Solar Lock",
+];
+const OBJECTIVES = [
+  "recon",
+  "salvage",
+  "defense",
+  "extraction",
+  "terraform",
 ] as const;
-const PRODUCT_NAMES = [
-  "Wireless Earbuds",
-  "Smart Watch",
-  "Bluetooth Speaker",
-  "Laptop Stand",
-  "USB Hub",
-  "Classic Tee",
-  "Slim Fit Chinos",
-  "Puffer Jacket",
-  "Sneakers",
-  "Baseball Cap",
-  "Organic Oats",
-  "Green Tea",
-  "Dark Chocolate",
-  "Almond Butter",
-  "Protein Bar",
-  "Clean Code",
-  "The Pragmatic Programmer",
-  "System Design Interview",
-  "DDIA",
-  "SICP",
-  "Resistance Bands",
-  "Pull-up Bar",
-  "Foam Roller",
-  "Jump Rope",
-  "Kettlebell",
-  "Desk Lamp",
-  "Cable Management Kit",
-  "Monitor Arm",
-  "Ergonomic Chair",
-  "Standing Desk",
-  "Webcam",
-  "Mechanical Keyboard",
-  "Gaming Mouse",
-  "Mousepad XL",
-  "Screen Cleaner",
-  "Power Bank",
-  "Phone Stand",
-  "Charging Cable",
-  "Screen Protector",
-  "Phone Case",
-  "Coffee Grinder",
-  "French Press",
-  "Aeropress",
-  "Gooseneck Kettle",
-  "Espresso Cups",
-  "Notebook A5",
-  "Fountain Pen",
-  "Sticky Notes",
-  "Index Cards",
-  "Whiteboard",
-];
+const MISSION_STATUSES = [
+  "queued",
+  "active",
+  "failed",
+  "complete",
+  "classified",
+] as const;
 
-export const PRODUCTS_DATA = PRODUCT_NAMES.map((name, i) => ({
+export const MISSIONS_DATA = Array.from({ length: 54 }, (_, i) => ({
   id: i + 1,
-  name,
-  category: CATEGORIES[i % CATEGORIES.length],
-  price: Math.round(Math.abs(Math.sin(i * 5.3) * 500) + 4.99),
-  stock: Math.floor(Math.abs(Math.cos(i * 2.1) * 300)),
-  rating: Math.round((3 + Math.abs(Math.sin(i * 1.7) * 2)) * 10) / 10,
-  inStock: i % 6 !== 0,
-  createdAt: new Date(2023, i % 12, (i % 28) + 1).toISOString().split("T")[0],
+  codeName: MISSION_NAMES[i % MISSION_NAMES.length],
+  objective: OBJECTIVES[i % OBJECTIVES.length],
+  targetPlanet: PLANET_NAMES[(i * 2) % PLANET_NAMES.length],
+  status: MISSION_STATUSES[i % MISSION_STATUSES.length],
+  threatScore: 1 + Math.floor(Math.abs(Math.sin(i * 6.4) * 100)),
+  rewardCredits: Math.round(Math.abs(Math.cos(i * 2.4) * 90_000) + 2_500),
+  crewRequired: 2 + (i % 10),
+  startsAt: new Date(2427, i % 12, (i % 28) + 1).toISOString().split("T")[0],
 }));
 
-// UNIFIED ACCESSOR
+const WEAPON_NAMES = [
+  "Helios Rail",
+  "Void Pike",
+  "Arc Splicer",
+  "Nova Lance",
+  "Grav Hammer",
+  "Ion Bloom",
+  "Pulse Repeater",
+  "Rift Carbine",
+  "Photon Fang",
+  "Nebula Drone",
+  "Quasar Blade",
+  "Aether Mortar",
+];
+const WEAPON_TYPES = [
+  "plasma",
+  "railgun",
+  "laser",
+  "ion",
+  "gravity",
+  "drone",
+] as const;
+const RARITIES = ["common", "rare", "epic", "legendary", "prototype"] as const;
+
+export const WEAPONS_DATA = Array.from({ length: 52 }, (_, i) => ({
+  id: i + 1,
+  name: WEAPON_NAMES[i % WEAPON_NAMES.length],
+  type: WEAPON_TYPES[i % WEAPON_TYPES.length],
+  damage: 10 + Math.floor(Math.abs(Math.sin(i * 4.2) * 940)),
+  rangeKm: Math.round(Math.abs(Math.cos(i * 3.6) * 42_000) + 120),
+  energyCost: 5 + Math.floor(Math.abs(Math.sin(i * 2.2) * 220)),
+  rarity: RARITIES[i % RARITIES.length],
+  experimental: i % 8 === 0 || i % 13 === 0,
+  forgedAt: new Date(2424, i % 12, (i % 28) + 1).toISOString().split("T")[0],
+}));
+
 export function getDataBySchema(schemaName: string): Record<string, unknown>[] {
   switch (schemaName) {
-    case "users":
-      return USERS_DATA as unknown as Record<string, unknown>[];
-    case "orders":
-      return ORDERS_DATA as unknown as Record<string, unknown>[];
-    case "products":
-      return PRODUCTS_DATA as unknown as Record<string, unknown>[];
+    case "players":
+      return PLAYERS_DATA as unknown as Record<string, unknown>[];
+    case "planets":
+      return PLANETS_DATA as unknown as Record<string, unknown>[];
+    case "missions":
+      return MISSIONS_DATA as unknown as Record<string, unknown>[];
+    case "weapons":
+      return WEAPONS_DATA as unknown as Record<string, unknown>[];
     default:
       return [];
   }

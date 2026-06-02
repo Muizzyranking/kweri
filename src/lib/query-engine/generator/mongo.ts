@@ -1,4 +1,4 @@
-import type { QueryGroup, QueryRule, Schema } from "../types";
+import type { LogicOperator, QueryGroup, QueryRule, Schema } from "../types";
 
 function ruleToMongo(rule: QueryRule, schema: Schema): Record<string, unknown> {
   const { field, operator, value = "", valueTo = "" } = rule;
@@ -66,14 +66,40 @@ function groupToMongo(
 ): Record<string, unknown> {
   if (group.children.length === 0) return {};
 
-  const parts = group.children.map((child) =>
-    child.kind === "rule"
-      ? ruleToMongo(child, schema)
-      : groupToMongo(child, schema),
-  );
+  let currentLogic: LogicOperator | null = null;
+  let bucket: Record<string, unknown>[] = [];
+  const segments: { logic: LogicOperator; filter: Record<string, unknown> }[] =
+    [];
 
-  if (parts.length === 1) return parts[0];
-  return { [`$${group.logic.toLowerCase()}`]: parts };
+  const flush = () => {
+    if (bucket.length === 0 || !currentLogic) return;
+    segments.push({
+      logic: currentLogic,
+      filter:
+        bucket.length === 1
+          ? bucket[0]
+          : { [`$${currentLogic.toLowerCase()}`]: bucket },
+    });
+    bucket = [];
+  };
+
+  group.children.forEach((child, index) => {
+    const connector =
+      index === 0 ? group.logic : (child.connector ?? group.logic);
+    const filter =
+      child.kind === "rule"
+        ? ruleToMongo(child, schema)
+        : groupToMongo(child, schema);
+    if (currentLogic && connector !== currentLogic) flush();
+    currentLogic = connector;
+    bucket.push(filter);
+  });
+
+  flush();
+
+  if (segments.length === 0) return {};
+  if (segments.length === 1) return segments[0].filter;
+  return { $and: segments.map((segment) => segment.filter) };
 }
 
 export function generateMongoDB(root: QueryGroup, schema: Schema): string {

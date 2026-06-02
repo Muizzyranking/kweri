@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { USERS_DATA } from "@/lib/mock-data";
 import { executeQuery } from "@/lib/query-engine/executor";
 import { createGroup, createRule } from "@/lib/query-engine/tree";
 import type { QueryGroup, QueryRule } from "@/lib/query-engine/types";
-import { USERS_SCHEMA } from "@/lib/schemas";
+import { USERS_DATA, USERS_SCHEMA } from "./fixtures";
 
 const makeRoot = (...children: (QueryGroup | QueryRule)[]): QueryGroup => ({
   ...createGroup("AND"),
