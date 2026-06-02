@@ -36,6 +36,7 @@ export interface QueryStore {
   // schemas
   setSchema: (name: string) => void;
   getSchema: () => Schema;
+  getSchemaByName: (name: string) => Schema | undefined;
   uploadSchema: (json: string) => { success: boolean; error?: string };
   deleteCustomSchema: (name: string) => void;
   getAllSchemas: () => Schema[];
@@ -47,6 +48,7 @@ export interface QueryStore {
     id: string,
     patch: Partial<Omit<QueryRule, "id" | "kind">>,
   ) => void;
+  updateNodeConnector: (id: string, connector: LogicOperator) => void;
   updateGroupLogic: (id: string, logic: LogicOperator) => void;
   toggleGroupCollapsed: (id: string) => void;
   moveNode: (
@@ -78,7 +80,7 @@ export interface QueryStore {
 
 // INITIAL STATE
 
-const DEFAULT_SCHEMA = SCHEMAS[0].name; // "users"
+const DEFAULT_SCHEMA = SCHEMAS[0].name;
 
 function makeInitialRoot(schemaName?: string): QueryGroup {
   const schema = getSchemaByName(schemaName ?? DEFAULT_SCHEMA) ?? SCHEMAS[0];
@@ -111,6 +113,12 @@ export const useQueryStore = create<QueryStore>()(
             customSchemas.find((s) => s.name === schemaName) ??
             getSchemaByName(schemaName) ??
             SCHEMAS[0]
+          );
+        },
+        getSchemaByName(name) {
+          return (
+            get().customSchemas.find((s) => s.name === name) ??
+            getSchemaByName(name)
           );
         },
         getAllSchemas() {
@@ -147,13 +155,16 @@ export const useQueryStore = create<QueryStore>()(
               }
             }
             const schema: Schema = { name: parsed.name, fields: parsed.fields };
+            const firstField = schema.fields[0]?.name ?? "";
+            const root = createGroup("AND");
+            root.children = [createRule(firstField, "equals")];
             set((s) => ({
               customSchemas: [
                 ...s.customSchemas.filter((c) => c.name !== schema.name),
                 schema,
               ],
               schemaName: schema.name,
-              root: makeInitialRoot(schema.name),
+              root,
             }));
             return { success: true };
           } catch {
@@ -209,6 +220,14 @@ export const useQueryStore = create<QueryStore>()(
               if (node.kind !== "group") return node;
               return { ...node, logic };
             }),
+          }));
+        },
+        updateNodeConnector(id, connector) {
+          set((s) => ({
+            root: updateNode(s.root, id, (node) => ({
+              ...node,
+              connector,
+            })),
           }));
         },
 
@@ -348,6 +367,9 @@ export const useQueryStore = create<QueryStore>()(
       {
         name: "kweri-store",
         partialize: (s) => ({
+          root: s.root,
+          schemaName: s.schemaName,
+          previewFormat: s.previewFormat,
           customSchemas: s.customSchemas,
           history: s.history,
           presets: s.presets,
@@ -363,40 +385,79 @@ export const useQueryStore = create<QueryStore>()(
 
 function getDefaultPresets(): QuerySnapshot[] {
   const r1 = {
-    ...createRule("country", "equals"),
-    value: "Nigeria",
+    ...createRule("role", "equals"),
+    value: "architect",
   } as QueryRule;
-  const r2 = { ...createRule("age", "greater_than"), value: "18" } as QueryRule;
+  const r2 = {
+    ...createRule("rank", "greater_than"),
+    value: "70",
+  } as QueryRule;
   const r3 = {
-    ...createRule("status", "equals"),
-    value: "active",
+    ...createRule("active", "equals"),
+    value: "true",
   } as QueryRule;
   const root1: QueryGroup = { ...createGroup("AND"), children: [r1, r2, r3] };
 
   const r4 = {
-    ...createRule("purchases", "greater_than"),
-    value: "10",
+    ...createRule("distanceLy", "greater_than"),
+    value: "300",
   } as QueryRule;
   const r5 = {
+    ...createRule("hazardLevel", "greater_than"),
+    value: "6",
+  } as QueryRule;
+  const root2: QueryGroup = { ...createGroup("AND"), children: [r4, r5] };
+
+  const r6 = {
     ...createRule("status", "equals"),
     value: "active",
   } as QueryRule;
-  const root2: QueryGroup = { ...createGroup("AND"), children: [r4, r5] };
+  const r7 = {
+    ...createRule("threatScore", "greater_than"),
+    value: "70",
+  } as QueryRule;
+  const root3: QueryGroup = { ...createGroup("AND"), children: [r6, r7] };
+
+  const r8 = {
+    ...createRule("rarity", "equals"),
+    value: "prototype",
+  } as QueryRule;
+  const r9 = {
+    ...createRule("experimental", "equals"),
+    value: "true",
+  } as QueryRule;
+  const root4: QueryGroup = { ...createGroup("AND"), children: [r8, r9] };
 
   return [
     {
       id: "preset-1",
-      name: "Active Nigerian users over 18",
-      schemaName: "users",
+      name: "Active elite architects",
+      schemaName: "players",
       root: root1,
       createdAt: new Date().toISOString(),
       isPreset: true,
     },
     {
       id: "preset-2",
-      name: "High-value active customers",
-      schemaName: "users",
+      name: "Distant high-risk worlds",
+      schemaName: "planets",
       root: root2,
+      createdAt: new Date().toISOString(),
+      isPreset: true,
+    },
+    {
+      id: "preset-3",
+      name: "Active threat missions",
+      schemaName: "missions",
+      root: root3,
+      createdAt: new Date().toISOString(),
+      isPreset: true,
+    },
+    {
+      id: "preset-4",
+      name: "Prototype weapons lab",
+      schemaName: "weapons",
+      root: root4,
       createdAt: new Date().toISOString(),
       isPreset: true,
     },
