@@ -2,7 +2,7 @@
 
 import { Bookmark, Clock, Eye, RotateCcw, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { useQueryStore } from "@/store/query-store";
+import { generateHistoryName, useQueryStore } from "@/store/query-store";
 import { QueryPreview } from "./query-preview";
 import "./builder.css";
 
@@ -21,6 +21,7 @@ export function BuilderSidebar() {
     savePreset,
     loadPreset,
     deletePreset,
+    getSchemaByName,
   } = useQueryStore();
   const isCustomSchema = customSchemas.some((s) => s.name === schemaName);
   const visiblePresets = presets.filter(
@@ -54,6 +55,18 @@ export function BuilderSidebar() {
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  const getSnapshotTitle = (snap: (typeof history)[number]) => {
+    const savedName = snap.name?.trim();
+    if (savedName && savedName !== "Auto-saved before new query") {
+      return savedName;
+    }
+
+    const schema = getSchemaByName(snap.schemaName);
+    return schema
+      ? generateHistoryName(snap.root, schema)
+      : `All ${snap.schemaName}`;
   };
 
   return (
@@ -173,7 +186,7 @@ export function BuilderSidebar() {
                             color: "var(--color-primary)",
                           }}
                         >
-                          {snap.name ?? "Unnamed query"}
+                          {getSnapshotTitle(snap)}
                         </div>
                         <div
                           style={{

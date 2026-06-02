@@ -11,9 +11,12 @@ import {
   updateNode,
 } from "@/lib/query-engine/tree";
 import type {
+  FieldDefinition,
   LogicOperator,
+  Operator,
   PreviewFormat,
   QueryGroup,
+  QueryNode,
   QueryRule,
   QuerySnapshot,
   Schema,
@@ -88,6 +91,190 @@ function makeInitialRoot(schemaName?: string): QueryGroup {
   const group = createGroup("AND");
   group.children = [createRule(firstField, "equals")];
   return group;
+}
+
+const HISTORY_NAME_LIMIT = 96;
+const HISTORY_NODE_LIMIT = 3;
+
+const HISTORY_OPERATOR_LABELS: Record<Operator, string> = {
+  equals: "=",
+  not_equals: "!=",
+  contains: "contains",
+  not_contains: "excludes",
+  starts_with: "starts with",
+  ends_with: "ends with",
+  greater_than: ">",
+  less_than: "<",
+  greater_than_or_equal: ">=",
+  less_than_or_equal: "<=",
+  in_array: "in",
+  not_in_array: "not in",
+  between: "between",
+  is_null: "is empty",
+  is_not_null: "is not empty",
+  regex: "matches",
+  before: "before",
+  after: "after",
+  on_date: "on",
+};
+
+export function generateHistoryName(root: QueryGroup, schema: Schema): string {
+  const summary = summarizeGroup(root, schema, HISTORY_NODE_LIMIT);
+  const schemaName = toTitleLabel(schema.name);
+
+  if (!summary.text) return `All ${schema.name}`;
+
+  const suffix = summary.remaining > 0 ? ` +${summary.remaining} more` : "";
+  return truncateText(
+    `${schemaName}: ${summary.text}${suffix}`,
+    HISTORY_NAME_LIMIT,
+  );
+}
+
+function summarizeGroup(
+  group: QueryGroup,
+  schema: Schema,
+  limit: number,
+): { text: string; remaining: number } {
+  const parts: string[] = [];
+  let remaining = 0;
+
+  for (const child of group.children) {
+    const childText = summarizeNode(child, schema);
+    if (!childText) continue;
+
+    if (parts.length >= limit) {
+      remaining += countSummarizableRules(child, schema);
+      continue;
+    }
+
+    const connector =
+      parts.length === 0 ? "" : `${child.connector ?? group.logic} `;
+    parts.push(`${connector}${childText}`);
+  }
+
+  return { text: parts.join(" "), remaining };
+}
+
+function summarizeNode(node: QueryNode, schema: Schema): string {
+  if (node.kind === "rule") return summarizeRule(node, schema);
+
+  const summary = summarizeGroup(node, schema, 2);
+  if (!summary.text) return "";
+
+  const suffix = summary.remaining > 0 ? ` +${summary.remaining} more` : "";
+  return `(${summary.text}${suffix})`;
+}
+
+function summarizeRule(rule: QueryRule, schema: Schema): string {
+  const field = schema.fields.find((f) => f.name === rule.field);
+  if (!field || !rule.field || !hasMeaningfulValue(rule)) return "";
+
+  const fieldLabel = getFieldLabel(field);
+  const operatorLabel = HISTORY_OPERATOR_LABELS[rule.operator];
+
+  if (rule.operator === "is_null" || rule.operator === "is_not_null") {
+    return `${fieldLabel} ${operatorLabel}`;
+  }
+
+  if (rule.operator === "between") {
+    return `${fieldLabel} ${operatorLabel} ${formatRangeValue(rule)}`;
+  }
+
+  return `${fieldLabel} ${operatorLabel} ${formatSingleValue(rule.value)}`;
+}
+
+function hasMeaningfulValue(rule: QueryRule): boolean {
+  if (rule.operator === "is_null" || rule.operator === "is_not_null") {
+    return true;
+  }
+
+  if (rule.operator === "between") {
+    return Boolean(rule.value?.trim() || rule.valueTo?.trim());
+  }
+
+  return Boolean(rule.value?.trim());
+}
+
+function countSummarizableRules(node: QueryNode, schema: Schema): number {
+  if (node.kind === "rule") return summarizeRule(node, schema) ? 1 : 0;
+  return node.children.reduce(
+    (count, child) => count + countSummarizableRules(child, schema),
+    0,
+  );
+}
+
+function getFieldLabel(field: FieldDefinition): string {
+  return field.label?.trim() || toTitleLabel(field.name);
+}
+
+function formatRangeValue(rule: QueryRule): string {
+  const from = formatSingleValue(rule.value);
+  const to = formatSingleValue(rule.valueTo);
+
+  if (from && to) return `${from} to ${to}`;
+  return from || to;
+}
+
+function formatSingleValue(value: string | undefined): string {
+  return truncateText(
+    (value ?? "")
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .join(", "),
+    28,
+  );
+}
+
+function toTitleLabel(value: string): string {
+  return value
+    .replace(/[_-]+/g, " ")
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function truncateText(value: string, maxLength: number): string {
+  if (value.length <= maxLength) return value;
+  return `${value.slice(0, maxLength - 3).trimEnd()}...`;
+}
+
+function mergePersistedStore(
+  persisted: unknown,
+  current: QueryStore,
+): QueryStore {
+  if (!persisted || typeof persisted !== "object") return current;
+
+  const persistedState = persisted as Partial<QueryStore>;
+  return {
+    ...current,
+    ...persistedState,
+    presets: mergeDefaultPresets(persistedState.presets, current.presets),
+  };
+}
+
+function mergeDefaultPresets(
+  savedPresets: QuerySnapshot[] | undefined,
+  defaultPresets: QuerySnapshot[],
+): QuerySnapshot[] {
+  const saved = Array.isArray(savedPresets) ? savedPresets : [];
+  const defaultIds = new Set(defaultPresets.map((preset) => preset.id));
+  const userPresets = saved.filter((preset) => !defaultIds.has(preset.id));
+
+  return [...userPresets, ...defaultPresets];
+}
+
+export function getBuiltInPresetsForTests(): QuerySnapshot[] {
+  return getDefaultPresets();
+}
+
+export function mergePresetsForTests(
+  savedPresets: QuerySnapshot[] | undefined,
+  defaultPresets: QuerySnapshot[],
+): QuerySnapshot[] {
+  return mergeDefaultPresets(savedPresets, defaultPresets);
 }
 
 // store
@@ -264,10 +451,10 @@ export const useQueryStore = create<QueryStore>()(
 
         // ── HISTORY ──
         pushHistory(name) {
-          const { root, schemaName, history } = get();
+          const { root, schemaName, history, getSchema } = get();
           const snapshot: QuerySnapshot = {
             id: uuidv4(),
-            name,
+            name: name?.trim() || generateHistoryName(root, getSchema()),
             schemaName,
             root: JSON.parse(JSON.stringify(root)),
             createdAt: new Date().toISOString(),
@@ -374,6 +561,7 @@ export const useQueryStore = create<QueryStore>()(
           history: s.history,
           presets: s.presets,
         }),
+        merge: mergePersistedStore,
       },
     ),
   ),
@@ -384,82 +572,232 @@ export const useQueryStore = create<QueryStore>()(
 // ─────────────────────────────────────────────
 
 function getDefaultPresets(): QuerySnapshot[] {
-  const r1 = {
-    ...createRule("role", "equals"),
-    value: "architect",
-  } as QueryRule;
-  const r2 = {
-    ...createRule("rank", "greater_than"),
-    value: "70",
-  } as QueryRule;
-  const r3 = {
-    ...createRule("active", "equals"),
-    value: "true",
-  } as QueryRule;
-  const root1: QueryGroup = { ...createGroup("AND"), children: [r1, r2, r3] };
-
-  const r4 = {
-    ...createRule("distanceLy", "greater_than"),
-    value: "300",
-  } as QueryRule;
-  const r5 = {
-    ...createRule("hazardLevel", "greater_than"),
-    value: "6",
-  } as QueryRule;
-  const root2: QueryGroup = { ...createGroup("AND"), children: [r4, r5] };
-
-  const r6 = {
-    ...createRule("status", "equals"),
-    value: "active",
-  } as QueryRule;
-  const r7 = {
-    ...createRule("threatScore", "greater_than"),
-    value: "70",
-  } as QueryRule;
-  const root3: QueryGroup = { ...createGroup("AND"), children: [r6, r7] };
-
-  const r8 = {
-    ...createRule("rarity", "equals"),
-    value: "prototype",
-  } as QueryRule;
-  const r9 = {
-    ...createRule("experimental", "equals"),
-    value: "true",
-  } as QueryRule;
-  const root4: QueryGroup = { ...createGroup("AND"), children: [r8, r9] };
+  const createdAt = new Date().toISOString();
 
   return [
-    {
-      id: "preset-1",
-      name: "Active elite architects",
-      schemaName: "players",
-      root: root1,
-      createdAt: new Date().toISOString(),
-      isPreset: true,
-    },
-    {
-      id: "preset-2",
-      name: "Distant high-risk worlds",
-      schemaName: "planets",
-      root: root2,
-      createdAt: new Date().toISOString(),
-      isPreset: true,
-    },
-    {
-      id: "preset-3",
-      name: "Active threat missions",
-      schemaName: "missions",
-      root: root3,
-      createdAt: new Date().toISOString(),
-      isPreset: true,
-    },
-    {
-      id: "preset-4",
-      name: "Prototype weapons lab",
-      schemaName: "weapons",
-      root: root4,
-      createdAt: new Date().toISOString(),
-      isPreset: true,
-    },
+    makePreset(
+      "preset-1",
+      "Active elite architects",
+      "players",
+      presetGroup("AND", [
+        presetRule("role", "equals", "architect"),
+        presetRule("rank", "greater_than", "70"),
+        presetRule("active", "equals", "true"),
+      ]),
+      createdAt,
+    ),
+    makePreset(
+      "preset-players-apprentice-review",
+      "Apprentices needing review",
+      "players",
+      presetGroup("AND", [
+        presetRule("role", "equals", "apprentice"),
+        presetRule("active", "equals", "true"),
+        presetRule("apprenticeScore", "between", "35", "100"),
+        presetRule("missionsCompleted", "less_than", "160"),
+        presetGroup("OR", [
+          presetRule("mentorCallsign", "equals", "Abdul Tsx"),
+          presetRule("mentorCallsign", "equals", "Coded Libra"),
+          presetRule("mentorCallsign", "equals", "Explorer"),
+          presetRule("mentorCallsign", "equals", "The Shinobi"),
+        ]),
+      ]),
+      createdAt,
+    ),
+    makePreset(
+      "preset-players-wanderer-scouts",
+      "High-value wanderer scouts",
+      "players",
+      presetGroup("AND", [
+        presetRule("role", "equals", "wanderer"),
+        presetRule("active", "equals", "true"),
+        presetRule("rankTier", "not_equals", "initiate"),
+        presetGroup("OR", [
+          presetRule("credits", "greater_than", "100000"),
+          presetRule("xp", "greater_than", "900000"),
+        ]),
+        presetGroup("OR", [
+          presetRule("sector", "equals", "Vela Expanse"),
+          presetRule("sector", "equals", "Crab Veil"),
+          presetRule("sector", "equals", "Zenith Belt"),
+        ]),
+      ]),
+      createdAt,
+    ),
+    makePreset(
+      "preset-2",
+      "Distant high-risk worlds",
+      "planets",
+      presetGroup("AND", [
+        presetRule("distanceLy", "greater_than", "300"),
+        presetRule("hazardLevel", "greater_than", "6"),
+        presetRule("colonized", "equals", "true"),
+      ]),
+      createdAt,
+    ),
+    makePreset(
+      "preset-planets-expansion",
+      "Safe expansion worlds",
+      "planets",
+      presetGroup("AND", [
+        presetRule("colonized", "equals", "false"),
+        presetRule("hazardLevel", "less_than_or_equal", "4"),
+        presetRule("distanceLy", "between", "600", "690"),
+        presetRule("gravity", "between", "1.4", "2.6"),
+        presetGroup("OR", [
+          presetRule("biome", "equals", "ocean"),
+          presetRule("biome", "equals", "jungle"),
+        ]),
+      ]),
+      createdAt,
+    ),
+    makePreset(
+      "preset-planets-anomaly-scan",
+      "Frontier anomaly scan",
+      "planets",
+      presetGroup("AND", [
+        presetRule("colonized", "equals", "false"),
+        presetRule("discoveredAt", "before", "2418-10-01"),
+        presetGroup("OR", [
+          presetRule("sector", "equals", "Vela Expanse"),
+          presetRule("sector", "equals", "Helix Gate"),
+          presetRule("sector", "equals", "Sable Quadrant"),
+        ]),
+        presetGroup("OR", [
+          presetRule("biome", "equals", "nebula"),
+          presetRule("hazardLevel", "greater_than_or_equal", "8"),
+        ]),
+      ]),
+      createdAt,
+    ),
+    makePreset(
+      "preset-3",
+      "Active threat missions",
+      "missions",
+      presetGroup("AND", [
+        presetRule("status", "equals", "active"),
+        presetRule("threatScore", "greater_than", "70"),
+      ]),
+      createdAt,
+    ),
+    makePreset(
+      "preset-missions-classified-reward",
+      "High-reward classified ops",
+      "missions",
+      presetGroup("AND", [
+        presetRule("threatScore", "greater_than_or_equal", "60"),
+        presetRule("rewardCredits", "greater_than", "40000"),
+        presetRule("crewRequired", "greater_than_or_equal", "4"),
+        presetRule("startsAt", "after", "2427-02-01"),
+        presetGroup("OR", [
+          presetRule("status", "equals", "active"),
+          presetRule("status", "equals", "classified"),
+          presetRule("status", "equals", "queued"),
+        ]),
+        presetGroup("OR", [
+          presetRule("objective", "equals", "salvage"),
+          presetRule("objective", "equals", "terraform"),
+        ]),
+      ]),
+      createdAt,
+    ),
+    makePreset(
+      "preset-missions-salvage-terraform",
+      "Salvage terraform candidates",
+      "missions",
+      presetGroup("AND", [
+        presetRule("status", "not_equals", "failed"),
+        presetRule("threatScore", "between", "30", "80"),
+        presetRule("crewRequired", "between", "4", "8"),
+        presetGroup("OR", [
+          presetRule("objective", "equals", "salvage"),
+          presetRule("objective", "equals", "terraform"),
+        ]),
+      ]),
+      createdAt,
+    ),
+    makePreset(
+      "preset-4",
+      "Prototype weapons lab",
+      "weapons",
+      presetGroup("AND", [
+        presetRule("rarity", "equals", "prototype"),
+        presetRule("experimental", "equals", "true"),
+      ]),
+      createdAt,
+    ),
+    makePreset(
+      "preset-weapons-long-range",
+      "Long-range efficient weapons",
+      "weapons",
+      presetGroup("AND", [
+        presetRule("rangeKm", "greater_than", "20000"),
+        presetRule("energyCost", "less_than", "100"),
+        presetRule("damage", "greater_than_or_equal", "250"),
+        presetRule("experimental", "equals", "false"),
+        presetGroup("OR", [
+          presetRule("type", "equals", "railgun"),
+          presetRule("type", "equals", "laser"),
+          presetRule("type", "equals", "drone"),
+        ]),
+      ]),
+      createdAt,
+    ),
+    makePreset(
+      "preset-weapons-unstable-heavy",
+      "Unstable heavy prototypes",
+      "weapons",
+      presetGroup("AND", [
+        presetRule("experimental", "equals", "true"),
+        presetRule("damage", "between", "300", "900"),
+        presetRule("energyCost", "greater_than", "100"),
+        presetRule("forgedAt", "before", "2424-09-01"),
+        presetGroup("OR", [
+          presetRule("type", "equals", "gravity"),
+          presetRule("type", "equals", "plasma"),
+          presetRule("type", "equals", "ion"),
+        ]),
+      ]),
+      createdAt,
+    ),
   ];
+}
+
+function makePreset(
+  id: string,
+  name: string,
+  schemaName: string,
+  root: QueryGroup,
+  createdAt: string,
+): QuerySnapshot {
+  return {
+    id,
+    name,
+    schemaName,
+    root,
+    createdAt,
+    isPreset: true,
+  };
+}
+
+function presetGroup(
+  logic: LogicOperator,
+  children: QueryNode[],
+  connector?: LogicOperator,
+): QueryGroup {
+  return { ...createGroup(logic, connector), children };
+}
+
+function presetRule(
+  field: string,
+  operator: Operator,
+  value?: string,
+  valueTo?: string,
+  connector?: LogicOperator,
+): QueryRule {
+  return {
+    ...createRule(field, operator, connector),
+    value: value ?? "",
+    valueTo,
+  };
 }

@@ -60,7 +60,7 @@ export function BuilderTopbar() {
   };
 
   const handleNewQuery = useCallback(() => {
-    pushHistory("Auto-saved before new query");
+    pushHistory();
     resetQuery();
   }, [pushHistory, resetQuery]);
 
