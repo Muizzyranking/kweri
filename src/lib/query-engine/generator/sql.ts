@@ -63,15 +63,17 @@ function groupToSQL(group: QueryGroup, schema: Schema, depth = 0): string {
   if (group.children.length === 0) return "";
 
   const indent = "  ".repeat(depth + 1);
-  const parts = group.children
-    .map((child) => {
-      if (child.kind === "rule") return indent + ruleToSQL(child, schema);
-      const inner = groupToSQL(child, schema, depth + 1);
-      return `${indent}(\n${inner}\n${indent})`;
-    })
-    .join(`\n${indent}${group.logic}\n`);
+  const parts = group.children.map((child, index) => {
+    const connector =
+      index === 0 ? "" : `\n${indent}${child.connector ?? group.logic}\n`;
+    if (child.kind === "rule") {
+      return `${connector}${indent}${ruleToSQL(child, schema)}`;
+    }
+    const inner = groupToSQL(child, schema, depth + 1);
+    return `${connector}${indent}(\n${inner}\n${indent})`;
+  });
 
-  return parts;
+  return parts.join("");
 }
 
 export function generateSQL(root: QueryGroup, schema: Schema): string {
