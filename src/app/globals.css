@@ -34,6 +34,15 @@
   --color-error: #ff4d6d;
   --color-warning: #ffd166;
 
+  --builder-bg-grid: rgba(53, 80, 113, 0.08);
+  --builder-panel: rgba(11, 18, 32, 0.94);
+  --builder-group: rgba(5, 9, 18, 0.62);
+  --builder-group-body: rgba(5, 9, 18, 0.72);
+  --builder-group-header: rgba(45, 212, 191, 0.08);
+  --builder-rule: rgba(16, 26, 45, 0.92);
+  --builder-results-head: rgba(11, 18, 32, 0.98);
+  --builder-results-toolbar: rgba(11, 18, 32, 0.76);
+
   /* Fonts */
   --font-display: "ClashDisplay", "Space Grotesk", sans-serif;
   --font-body: "Space Grotesk", sans-serif;
@@ -71,6 +80,15 @@
   --color-orange-glow: rgba(255, 176, 0, 0.12);
   --color-teal-glow: rgba(17, 126, 147, 0.12);
 
+  --builder-bg-grid: rgba(143, 178, 216, 0.28);
+  --builder-panel: rgba(255, 255, 255, 0.92);
+  --builder-group: rgba(255, 255, 255, 0.84);
+  --builder-group-body: rgba(238, 246, 255, 0.9);
+  --builder-group-header: rgba(17, 126, 147, 0.08);
+  --builder-rule: rgba(255, 255, 255, 0.96);
+  --builder-results-head: rgba(255, 255, 255, 0.98);
+  --builder-results-toolbar: rgba(255, 255, 255, 0.82);
+
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.15);
@@ -87,10 +105,7 @@ html {
 }
 
 body {
-  background:
-    radial-gradient(circle at 18% 12%, rgba(45, 212, 191, 0.1), transparent 28%),
-    radial-gradient(circle at 82% 0%, rgba(255, 176, 0, 0.08), transparent 24%),
-    var(--color-bg);
+  background: var(--color-bg);
   color: var(--color-primary);
   font-family: var(--font-body);
   font-size: 15px;
@@ -131,31 +146,8 @@ body {
   border-radius: var(--radius-sm);
 }
 
-/* Animated gradient text */
 .gradient-text {
-  background: linear-gradient(
-    135deg,
-    var(--color-orange),
-    var(--color-teal-bright),
-    var(--color-orange)
-  );
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: gradientShift 4s ease infinite;
-}
-
-@keyframes gradientShift {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+  color: var(--color-orange);
 }
 
 /* Noise overlay */

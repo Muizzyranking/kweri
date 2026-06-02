@@ -13,7 +13,7 @@ import {
   Upload,
 } from "lucide-react";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { Fragment, useRef, useState } from "react";
 import { KweriLogoMark } from "@/components/ui/logo";
 import { useTheme } from "@/components/ui/theme-provider";
 import { SCHEMAS } from "@/lib/schemas";
@@ -26,7 +26,7 @@ const BUILTIN_EMOJI: Record<string, string> = {
   players: "🎮",
   planets: "🪐",
   missions: "🚀",
-  weapons: "⚔️",
+  weapons: "⚔",
 };
 
 const EXAMPLE_SCHEMA = `{
@@ -197,8 +197,8 @@ export default function SchemasPage() {
                 const isBuiltin = SCHEMAS.some((s) => s.name === schema.name);
                 const isExpanded = expandedRow === schema.name;
                 return (
-                  <>
-                    <tr key={schema.name}>
+                  <Fragment key={schema.name}>
+                    <tr>
                       <td>
                         <div className="schema-row__name">
                           <span className="schema-row__emoji">
@@ -334,7 +334,7 @@ export default function SchemasPage() {
                         </td>
                       </tr>
                     )}
-                  </>
+                  </Fragment>
                 );
               })}
             </tbody>
