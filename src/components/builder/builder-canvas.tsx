@@ -13,7 +13,6 @@ import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { useCallback, useMemo } from "react";
 import { findNode } from "@/lib/query-engine/tree";
 import { validateQuery } from "@/lib/query-engine/validator";
-import { getSchemaByName, SCHEMAS } from "@/lib/schemas";
 import { useQueryStore } from "@/store/query-store";
 import { BuilderSidebar } from "./builder-sidebar";
 import { BuilderTopbar } from "./builder-topbar";
@@ -24,13 +23,8 @@ import "./results.css";
 
 export function BuilderCanvas() {
   const root = useQueryStore((s) => s.root);
-  const schemaName = useQueryStore((s) => s.schemaName);
   const moveNode = useQueryStore((s) => s.moveNode);
-
-  const schema = useMemo(
-    () => getSchemaByName(schemaName) ?? SCHEMAS[0],
-    [schemaName],
-  );
+  const schema = useQueryStore((s) => s.getSchema());
 
   const { errors } = useMemo(() => validateQuery(root, schema), [root, schema]);
 
@@ -84,18 +78,9 @@ export function BuilderCanvas() {
     <div className="builder-page">
       <BuilderTopbar />
 
-      <div
-        className="builder-body"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 380px",
-          gridTemplateRows: "1fr 340px",
-          minHeight: 0,
-          overflow: "hidden",
-        }}
-      >
-        {/* Main canvas — top left */}
-        <main className="builder-main" style={{ gridColumn: 1, gridRow: 1 }}>
+      <div className="builder-body builder-body--with-results">
+        {/* Main canvas - top left */}
+        <main className="builder-main">
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
@@ -114,8 +99,6 @@ export function BuilderCanvas() {
             <div
               style={{
                 padding: "10px 14px",
-                background: "rgba(229,62,62,0.06)",
-                border: "1px solid rgba(229,62,62,0.2)",
                 borderRadius: 10,
                 fontSize: 12,
                 color: "var(--color-error)",
@@ -131,16 +114,13 @@ export function BuilderCanvas() {
           )}
         </main>
 
-        {/* Sidebar — right column, full height */}
-        <aside
-          className="builder-sidebar"
-          style={{ gridColumn: 2, gridRow: "1 / 3" }}
-        >
+        {/* Sidebar - right column, full height */}
+        <aside className="builder-sidebar">
           <BuilderSidebar />
         </aside>
 
-        {/* Results panel — bottom left */}
-        <div className="builder-lower" style={{ gridColumn: 1, gridRow: 2 }}>
+        {/* Results panel - bottom left */}
+        <div className="builder-lower">
           <div className="builder-lower__header">
             <span className="builder-lower__title">Results</span>
           </div>

@@ -15,7 +15,7 @@ import { getDataBySchema } from "@/lib/mock-data";
 import { executeQuery } from "@/lib/query-engine/executor";
 import type { FieldType } from "@/lib/query-engine/types";
 import { validateQuery } from "@/lib/query-engine/validator";
-import { getSchemaByName, SCHEMAS } from "@/lib/schemas";
+import { SCHEMAS } from "@/lib/schemas";
 import { useQueryStore } from "@/store/query-store";
 import "./results.css";
 
@@ -27,11 +27,7 @@ export function ResultsPanel() {
   const root = useQueryStore((s) => s.root);
   const schemaName = useQueryStore((s) => s.schemaName);
   const customSchemas = useQueryStore((s) => s.customSchemas);
-
-  const schema = useMemo(
-    () => getSchemaByName(schemaName) ?? SCHEMAS[0],
-    [schemaName],
-  );
+  const schema = useQueryStore((s) => s.getSchema());
 
   const isCustomSchema = customSchemas.some((s) => s.name === schemaName);
   const isBuiltinSchema = SCHEMAS.some((s) => s.name === schemaName);
@@ -184,7 +180,7 @@ export function ResultsPanel() {
             disabled={loading || !valid || isCustomSchema}
             title={
               isCustomSchema
-                ? "No execution backend for custom schemas"
+                ? "Preview is available for custom schemas; mock execution is built-ins only"
                 : !valid
                   ? "Fix validation errors first"
                   : "Run query"
@@ -199,31 +195,22 @@ export function ResultsPanel() {
       {/* Body */}
       {/* Custom schema — no execution backend */}
       {isCustomSchema && !isBuiltinSchema && (
-        <div className="results-empty" style={{ flex: 1 }}>
+        <div className="results-empty results-empty--custom">
           <div className="results-empty__icon">🔌</div>
-          <div className="results-empty__title">No execution backend</div>
+          <div className="results-empty__title">Preview-only schema</div>
           <div className="results-empty__desc">
-            Custom schemas don&apos;t have a data source to run against. Use the
-            query preview to copy the generated SQL, MongoDB, or GraphQL and run
-            it in your own database.
+            Uploaded schemas update the builder fields and SQL, MongoDB, and
+            GraphQL preview. Mock result execution is available for built-in
+            sci-fi datasets only.
           </div>
           <Link href="/schemas" style={{ textDecoration: "none" }}>
             <button
               type="button"
+              className="results-empty__action"
               style={{
-                marginTop: 8,
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 6,
-                padding: "7px 16px",
-                height: 32,
-                borderRadius: 8,
-                border: "1px solid var(--color-border)",
-                background: "var(--color-elevated)",
-                color: "var(--color-secondary)",
-                fontSize: 12,
-                cursor: "pointer",
-                fontFamily: "var(--font-body)",
               }}
             >
               Manage schemas

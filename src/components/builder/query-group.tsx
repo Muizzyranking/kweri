@@ -13,7 +13,9 @@ import {
 } from "lucide-react";
 import { memo, useCallback } from "react";
 import type {
+  LogicOperator,
   QueryGroup as QueryGroupType,
+  QueryNode,
   Schema,
 } from "@/lib/query-engine/types";
 import { useQueryStore } from "@/store/query-store";
@@ -38,16 +40,21 @@ export const QueryGroup = memo(function QueryGroup({
   const addRule = useQueryStore((s) => s.addRule);
   const addGroup = useQueryStore((s) => s.addGroup);
   const removeNode = useQueryStore((s) => s.removeNode);
-  const updateGroupLogic = useQueryStore((s) => s.updateGroupLogic);
+  const updateNodeConnector = useQueryStore((s) => s.updateNodeConnector);
   const toggleGroupCollapsed = useQueryStore((s) => s.toggleGroupCollapsed);
 
   const hasError = Boolean(errorMap[group.id]);
   const groupError = errorMap[group.id] ?? null;
   const isCollapsed = group.collapsed ?? false;
 
-  const handleLogicToggle = useCallback(() => {
-    updateGroupLogic(group.id, group.logic === "AND" ? "OR" : "AND");
-  }, [group.id, group.logic, updateGroupLogic]);
+  const handleConnectorToggle = useCallback(
+    (node: QueryNode) => {
+      const connector: LogicOperator =
+        (node.connector ?? group.logic) === "AND" ? "OR" : "AND";
+      updateNodeConnector(node.id, connector);
+    },
+    [group.logic, updateNodeConnector],
+  );
 
   const childIds = group.children.map((c) => c.id);
 
@@ -64,15 +71,6 @@ export const QueryGroup = memo(function QueryGroup({
     >
       {/* Header */}
       <div className="query-group__header">
-        <button
-          type="button"
-          className={`query-group__logic-btn query-group__logic-btn--${group.logic.toLowerCase()}`}
-          onClick={handleLogicToggle}
-          title="Click to toggle AND / OR"
-        >
-          {group.logic}
-        </button>
-
         <span className="query-group__meta">
           {group.children.length} condition
           {group.children.length !== 1 ? "s" : ""}
@@ -121,26 +119,36 @@ export const QueryGroup = memo(function QueryGroup({
               items={childIds}
               strategy={verticalListSortingStrategy}
             >
-              {group.children.map((child) =>
-                child.kind === "rule" ? (
-                  <QueryRule
-                    key={child.id}
-                    rule={child}
-                    schema={schema}
-                    errorMap={errorMap}
-                    groupId={group.id}
-                  />
-                ) : (
-                  <QueryGroup
-                    key={child.id}
-                    group={child}
-                    schema={schema}
-                    errorMap={errorMap}
-                    isRoot={false}
-                    depth={depth + 1}
-                  />
-                ),
-              )}
+              {group.children.map((child, index) => (
+                <div key={child.id} className="query-node-row">
+                  {index > 0 && (
+                    <button
+                      type="button"
+                      className={`query-node-row__connector query-group__logic-btn query-group__logic-btn--${(child.connector ?? group.logic).toLowerCase()}`}
+                      onClick={() => handleConnectorToggle(child)}
+                      title="Toggle how this condition joins the previous node"
+                    >
+                      {child.connector ?? group.logic}
+                    </button>
+                  )}
+                  {child.kind === "rule" ? (
+                    <QueryRule
+                      rule={child}
+                      schema={schema}
+                      errorMap={errorMap}
+                      groupId={group.id}
+                    />
+                  ) : (
+                    <QueryGroup
+                      group={child}
+                      schema={schema}
+                      errorMap={errorMap}
+                      isRoot={false}
+                      depth={depth + 1}
+                    />
+                  )}
+                </div>
+              ))}
             </SortableContext>
 
             {group.children.length === 0 && (

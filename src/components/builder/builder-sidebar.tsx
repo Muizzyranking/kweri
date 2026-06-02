@@ -12,6 +12,8 @@ export function BuilderSidebar() {
   const [tab, setTab] = useState<Tab>("preview");
   const [presetName, setPresetName] = useState("");
   const {
+    schemaName,
+    customSchemas,
     history,
     presets,
     restoreSnapshot,
@@ -20,6 +22,10 @@ export function BuilderSidebar() {
     loadPreset,
     deletePreset,
   } = useQueryStore();
+  const isCustomSchema = customSchemas.some((s) => s.name === schemaName);
+  const visiblePresets = presets.filter(
+    (p) => p.schemaName === schemaName || (!p.isPreset && isCustomSchema),
+  );
 
   const tabStyle = (t: Tab) => ({
     flex: 1,
@@ -271,7 +277,7 @@ export function BuilderSidebar() {
 
             {/* Preset list */}
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              {presets.map((p) => (
+              {visiblePresets.map((p) => (
                 <div
                   key={p.id}
                   style={{
