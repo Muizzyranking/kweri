@@ -2,20 +2,20 @@ import type { Step } from "@/types/landing/hero";
 
 export const STEPS: Step[] = [
   { kind: "group", logic: "AND", depth: 0 },
-  { kind: "rule", field: "country", op: "=", value: "Nigeria", depth: 1 },
-  { kind: "rule", field: "age", op: ">", value: "18", depth: 1 },
+  { kind: "rule", field: "faction", op: "=", value: "nova_guard", depth: 1 },
+  { kind: "rule", field: "rank", op: ">", value: "40", depth: 1 },
   { kind: "group", logic: "OR", depth: 1 },
-  { kind: "rule", field: "status", op: "=", value: "active", depth: 2 },
-  { kind: "rule", field: "purchases", op: ">", value: "10", depth: 2 },
+  { kind: "rule", field: "class", op: "=", value: "voidwalker", depth: 2 },
+  { kind: "rule", field: "xp", op: ">", value: "250000", depth: 2 },
 ];
 
 export const SQL_LINES = [
-  { text: "SELECT * FROM users", color: "var(--color-orange)" },
+  { text: "SELECT * FROM players", color: "var(--color-orange)" },
   { text: "WHERE", color: "var(--color-muted)" },
-  { text: '  country = "Nigeria"', color: "var(--color-primary)" },
-  { text: "  AND age > 18", color: "var(--color-primary)" },
+  { text: '  faction = "nova_guard"', color: "var(--color-primary)" },
+  { text: "  AND rank > 40", color: "var(--color-primary)" },
   { text: "  AND (", color: "var(--color-muted)" },
-  { text: '    status = "active"', color: "var(--color-primary)" },
-  { text: "    OR purchases > 10", color: "var(--color-primary)" },
+  { text: '    class = "voidwalker"', color: "var(--color-primary)" },
+  { text: "    OR xp > 250000", color: "var(--color-primary)" },
   { text: "  )", color: "var(--color-muted)" },
 ];
