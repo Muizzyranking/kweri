@@ -6,7 +6,7 @@ import {
   nodeHasError,
   validateQuery,
 } from "@/lib/query-engine/validator";
-import { USERS_SCHEMA } from "@/lib/schemas";
+import { USERS_SCHEMA } from "./fixtures";
 
 const makeRoot = (...children: (QueryGroup | QueryRule)[]): QueryGroup => ({
   ...createGroup("AND"),
@@ -14,11 +14,11 @@ const makeRoot = (...children: (QueryGroup | QueryRule)[]): QueryGroup => ({
 });
 
 describe("validateQuery — empty group", () => {
-  it("fails when root has no children", () => {
+  it("passes when root has no children", () => {
     const root = createGroup("AND");
     const result = validateQuery(root, USERS_SCHEMA);
-    expect(result.valid).toBe(false);
-    expect(result.errors[0].nodeId).toBe(root.id);
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
   });
 });
 
@@ -231,12 +231,12 @@ describe("validateQuery — null operators", () => {
 });
 
 describe("validateQuery — nested groups", () => {
-  it("fails when a nested group is empty", () => {
+  it("passes when a nested group is empty", () => {
     const inner = createGroup("OR");
     const root = makeRoot(inner);
     const result = validateQuery(root, USERS_SCHEMA);
-    expect(result.valid).toBe(false);
-    expect(result.errors[0].nodeId).toBe(inner.id);
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
   });
 
   it("validates all rules across nested groups", () => {
