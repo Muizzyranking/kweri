@@ -12,6 +12,7 @@
   justify-content: space-between;
   padding: 10px 16px;
   border-bottom: 1px solid var(--color-border);
+  background: rgba(11, 18, 32, 0.76);
   flex-shrink: 0;
   gap: 8px;
   flex-wrap: wrap;
@@ -66,7 +67,7 @@
 }
 
 .results-panel__sort-select:focus {
-  border-color: var(--color-orange);
+  border-color: var(--color-teal-bright);
 }
 
 /* ── TABLE ── */
@@ -85,7 +86,7 @@
 .results-table th {
   position: sticky;
   top: 0;
-  background: var(--color-surface);
+  background: rgba(11, 18, 32, 0.98);
   border-bottom: 1px solid var(--color-border);
   padding: 8px 12px;
   text-align: left;
@@ -126,7 +127,7 @@
 }
 
 .results-table tr:hover td {
-  background: var(--color-elevated);
+  background: rgba(45, 212, 191, 0.08);
 }
 
 .results-table tr:last-child td {

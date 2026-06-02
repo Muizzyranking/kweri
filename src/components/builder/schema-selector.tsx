@@ -6,9 +6,10 @@ import { useQueryStore } from "@/store/query-store";
 import "./builder.css";
 
 const EMOJI: Record<string, string> = {
-  users: "👤",
-  orders: "📦",
-  products: "🏷️",
+  players: "🎮",
+  planets: "🪐",
+  missions: "🚀",
+  weapons: "⚔️",
 };
 
 export function SchemaSelector() {

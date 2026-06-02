@@ -237,8 +237,8 @@ export function ResultsPanel() {
           <div className="results-empty__icon">▷</div>
           <div className="results-empty__title">Ready to run</div>
           <div className="results-empty__desc">
-            Build your query above, then hit Run to see matching results from
-            the mock dataset.
+            Build your filter above, then run it against the built-in sci-fi
+            dataset.
           </div>
         </div>
       )}
