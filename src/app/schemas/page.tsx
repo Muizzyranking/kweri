@@ -23,21 +23,22 @@ import { ConfirmDelete } from "@/components/schemas/confirm-delete";
 import { ExpandedFields, FieldsPreview } from "@/components/schemas/fields";
 
 const BUILTIN_EMOJI: Record<string, string> = {
-  users: "👤",
-  orders: "📦",
-  products: "🏷",
+  players: "🎮",
+  planets: "🪐",
+  missions: "🚀",
+  weapons: "⚔️",
 };
 
 const EXAMPLE_SCHEMA = `{
-  "name": "employees",
+  "name": "starships",
   "fields": [
-    { "name": "id",         "type": "number" },
-    { "name": "name",       "type": "string" },
-    { "name": "department", "type": "enum",
-      "enumValues": ["eng","design","ops"] },
-    { "name": "salary",     "type": "number" },
-    { "name": "startDate",  "type": "date" },
-    { "name": "active",     "type": "boolean" }
+    { "name": "id",            "type": "number" },
+    { "name": "name",          "type": "string" },
+    { "name": "class",         "type": "enum",
+      "enumValues": ["frigate","carrier","corvette"] },
+    { "name": "warpRangeLy",   "type": "number" },
+    { "name": "commissioned",  "type": "date" },
+    { "name": "combatReady",   "type": "boolean" }
   ]
 }`;
 
@@ -419,7 +420,7 @@ export default function SchemasPage() {
           <div className="format-example">
             <div className="format-example__header">
               <span className="format-example__label">
-                Example — employees schema
+                Example - starships schema
               </span>
               <button
                 type="button"
