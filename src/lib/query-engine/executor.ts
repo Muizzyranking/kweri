@@ -131,8 +131,15 @@ function matchNode(
   const { logic, children } = node;
   if (children.length === 0) return true;
 
-  if (logic === "AND") return children.every((c) => matchNode(row, c, schema));
-  return children.some((c) => matchNode(row, c, schema));
+  let result = matchNode(row, children[0], schema);
+  for (let i = 1; i < children.length; i++) {
+    const child = children[i];
+    const connector = child.connector ?? logic;
+    const childResult = matchNode(row, child, schema);
+    result =
+      connector === "AND" ? result && childResult : result || childResult;
+  }
+  return result;
 }
 
 // PUBLIC API

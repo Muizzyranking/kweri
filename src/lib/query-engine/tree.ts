@@ -11,12 +11,16 @@ import type {
 export function createRule(
   field: string,
   operator: Operator = "equals",
+  connector?: LogicOperator,
 ): QueryRule {
-  return { id: uuidv4(), kind: "rule", field, operator, value: "" };
+  return { id: uuidv4(), kind: "rule", connector, field, operator, value: "" };
 }
 
-export function createGroup(logic: LogicOperator = "AND"): QueryGroup {
-  return { id: uuidv4(), kind: "group", logic, children: [] };
+export function createGroup(
+  logic: LogicOperator = "AND",
+  connector?: LogicOperator,
+): QueryGroup {
+  return { id: uuidv4(), kind: "group", connector, logic, children: [] };
 }
 
 export function createRootGroup(): QueryGroup {

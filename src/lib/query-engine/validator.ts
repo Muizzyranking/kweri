@@ -152,10 +152,6 @@ function validateGroup(group: QueryGroup, schema: Schema): ValidationError[] {
   const errors: ValidationError[] = [];
 
   if (group.children.length === 0) {
-    errors.push({
-      nodeId: group.id,
-      message: "Group must have at least one condition",
-    });
     return errors;
   }
 
