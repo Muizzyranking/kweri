@@ -7,7 +7,7 @@ interface Props {
 
 export function KweriLogoMark({ size = 32, className }: Props) {
   const s = size;
-  const r = s * 0.25; // corner radius of bg rect
+  const r = s * 0.25;
 
   return (
     <svg
@@ -20,11 +20,11 @@ export function KweriLogoMark({ size = 32, className }: Props) {
       className={cn(className)}
       aria-label="Kweri logo"
     >
-      <rect width="32" height="32" rx={r} fill="#111111" />
-      <rect x="4" y="7" width="24" height="4" rx="2" fill="#1A7A8A" />
-      <rect x="7" y="14" width="18" height="4" rx="2" fill="#E36414" />
-      <rect x="10" y="21" width="9" height="4" rx="2" fill="#E36414" />
-      <circle cx="23" cy="23" r="3" fill="#1A7A8A" />
+      <rect width="32" height="32" rx={r} />
+      <rect x="4" y="7" width="24" height="4" rx="2" fill="#117E93" />
+      <rect x="7" y="14" width="18" height="4" rx="2" fill="#FFB000" />
+      <rect x="10" y="21" width="9" height="4" rx="2" fill="#FFB000" />
+      <circle cx="23" cy="23" r="3" fill="#117E93" />
     </svg>
   );
 }
