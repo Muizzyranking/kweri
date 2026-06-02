@@ -11,73 +11,6 @@ const PLANET_NAMES = [
   "Cryon Delta",
 ];
 
-const PLAYER_CALLSIGNS = [
-  "Nova Lynx",
-  "Iron Vega",
-  "Pulse Warden",
-  "Rift Sable",
-  "Echo Vale",
-  "Solar Kite",
-  "Cipher Atlas",
-  "Ghost Meridian",
-  "Ion Ember",
-  "Zenith Flux",
-  "Apex Nyx",
-  "Comet Rook",
-  "Void Kestrel",
-  "Signal Knox",
-  "Halo Strider",
-  "Rune Vortex",
-  "Titan Sol",
-  "Orbit Cinder",
-  "Neon Quasar",
-  "Argon Wake",
-  "Drift Aegis",
-  "Helix Storm",
-  "Flux Runner",
-  "Vector Ash",
-  "Prism Echo",
-  "Shard Ranger",
-  "Cobalt Wing",
-  "Zero Horizon",
-  "Lunar Pike",
-  "Omega Trace",
-];
-
-const PLAYER_CLASSES = [
-  "vanguard",
-  "scout",
-  "engineer",
-  "medic",
-  "voidwalker",
-] as const;
-const FACTIONS = [
-  "nova_guard",
-  "orion_pact",
-  "riftborn",
-  "atlas_union",
-] as const;
-
-export const PLAYERS_DATA = PLAYER_CALLSIGNS.map((callsign, i) => ({
-  id: i + 1,
-  callsign,
-  class: PLAYER_CLASSES[i % PLAYER_CLASSES.length],
-  rank: 1 + Math.floor(Math.abs(Math.sin(i * 4.7) * 99)),
-  homePlanet: PLANET_NAMES[i % PLANET_NAMES.length],
-  faction: FACTIONS[i % FACTIONS.length],
-  xp: Math.floor(Math.abs(Math.cos(i * 2.9) * 850_000) + 5_000),
-  active: i % 5 !== 0,
-  lastSignal: new Date(2426, i % 12, (i % 28) + 1).toISOString().split("T")[0],
-}));
-
-const BIOMES = [
-  "desert",
-  "ice",
-  "ocean",
-  "volcanic",
-  "jungle",
-  "nebula",
-] as const;
 const SECTORS = [
   "Orion Spur",
   "Vela Expanse",
@@ -88,6 +21,158 @@ const SECTORS = [
   "Zenith Belt",
   "Eclipse Reach",
 ];
+
+export const ARCHITECT_NAMES = [
+  "Abdul Tsx",
+  "Coded Libra",
+  "Explorer",
+  "Shalom",
+  "The Shinobi",
+  "Xenon",
+  "Phuhard",
+  "Adaeze",
+  "Mantle Bearer",
+  "Damola",
+  "Naza Listic",
+  "Ejiro Frances",
+  "Aunty Debo",
+  "Enesi Dev",
+  "El Tana",
+  "Basi",
+  "Yeehsa Dev",
+  "Her Chaos",
+  "Tems",
+  "Sugar",
+  "Big Daddy",
+  "Kami Sama",
+];
+
+export const APPRENTICE_NAMES = [
+  "Muizzy Ranking",
+  "Human AI",
+  "Joanna Bassey",
+  "Kelechi Uba",
+  "Don Victory",
+  "Grace Ogbenfore",
+  "Blessing Ayuba",
+  "Grace Ogbenfore",
+  "Afuni Mawobe",
+  "Truella",
+  "Teo is VijuMilk",
+  "The Neverdone",
+  "Grey Thedev",
+  "Lee Yousuf",
+  "Lee Yousuf",
+  "Uju Joy",
+  "Kill Switch",
+  "Trojan",
+  "Zubee",
+];
+
+const WANDERER_NAMES = [
+  "Ghost Meridian",
+  "Void Kestrel",
+  "Neon Quasar",
+  "Argon Wake",
+  "Drift Aegis",
+  "Helix Storm",
+  "Flux Runner",
+  "Vector Ash",
+  "Shard Ranger",
+  "Cobalt Wing",
+  "Zero Horizon",
+  "Lunar Pike",
+  "Omega Trace",
+  "Rift Sable",
+  "Echo Vale",
+  "Solar Kite",
+  "Ion Ember",
+  "Comet Rook",
+  "Prism Echo",
+  "Apex Nyx",
+];
+
+const RANK_TIERS = ["initiate", "adept", "elite", "mythic"] as const;
+const GUILDS = [
+  "Keystone Circle",
+  "Signal Forge",
+  "Orbit Foundry",
+  "Helix Archive",
+  "Void Cartel",
+  "Northstar Relay",
+];
+
+function makePlayer(
+  callsign: string,
+  role: "architect" | "apprentice" | "wanderer",
+  i: number,
+  globalOffset: number,
+) {
+  const mentor =
+    role === "apprentice"
+      ? ARCHITECT_NAMES[i % ARCHITECT_NAMES.length]
+      : role === "wanderer"
+        ? WANDERER_NAMES[(i + 3) % WANDERER_NAMES.length]
+        : "";
+
+  return {
+    id: globalOffset + i + 1,
+    callsign,
+    role,
+    rankTier:
+      RANK_TIERS[Math.floor(Math.abs(Math.sin(globalOffset * 1.6) * 4)) % 4],
+    originWorld: PLANET_NAMES[globalOffset % PLANET_NAMES.length],
+    sector: SECTORS[globalOffset % SECTORS.length],
+    guild: GUILDS[globalOffset % GUILDS.length],
+    rank: 1 + Math.floor(Math.abs(Math.sin(globalOffset * 4.7) * 99)),
+    xp: Math.floor(Math.abs(Math.cos(globalOffset * 2.9) * 1_250_000) + 5_000),
+    missionsCompleted: Math.floor(Math.abs(Math.sin(globalOffset * 3.4) * 260)),
+    mentorScore:
+      role === "architect"
+        ? 60 + Math.floor(Math.abs(Math.sin(globalOffset) * 40))
+        : 0,
+    apprenticeScore:
+      role === "apprentice"
+        ? 35 + Math.floor(Math.abs(Math.cos(globalOffset * 1.3) * 65))
+        : 0,
+    signalIntegrity: Math.floor(Math.abs(Math.cos(globalOffset * 2.1) * 100)),
+    credits: Math.round(
+      Math.abs(Math.sin(globalOffset * 5.1) * 140_000) + 1_000,
+    ),
+    mentorCallsign: mentor,
+    active: globalOffset % 5 !== 0,
+    joinedAt: new Date(2421, globalOffset % 12, (globalOffset % 28) + 1)
+      .toISOString()
+      .split("T")[0],
+    lastSignal: new Date(2426, globalOffset % 12, (globalOffset % 28) + 1)
+      .toISOString()
+      .split("T")[0],
+  };
+}
+
+export const PLAYERS_DATA = [
+  ...ARCHITECT_NAMES.map((name, i) => makePlayer(name, "architect", i, i)),
+  ...APPRENTICE_NAMES.map((name, i) =>
+    makePlayer(name, "apprentice", i, ARCHITECT_NAMES.length + i),
+  ),
+  ...WANDERER_NAMES.map((name, i) =>
+    makePlayer(
+      name,
+      "wanderer",
+      i,
+      ARCHITECT_NAMES.length + APPRENTICE_NAMES.length + i,
+    ),
+  ),
+];
+
+const BIOMES = [
+  "desert",
+  "ice",
+  "ocean",
+  "volcanic",
+  "jungle",
+  "nebula",
+] as const;
 
 export const PLANETS_DATA = Array.from({ length: 48 }, (_, i) => ({
   id: i + 1,
